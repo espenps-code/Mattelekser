@@ -498,9 +498,12 @@ function makeTallGridField(heightMm, widthMm = 178) {
   </div>`;
 }
 
-// 5 rows (50mm) for add/sub, 3 rows (30mm) for mul/div
-function gridHeightMm(type) {
-  return (type === 'add' || type === 'sub') ? 50 : 30;
+// Rutehøyde per regneart. For utfordrende mul/div trengs mer plass til oppstilt utregning.
+// 5 rader (50mm) for add/sub, 7 rader (70mm) for utfordrende mul/div, 3 rader (30mm) ellers.
+function gridHeightMm(type, level) {
+  if (type === 'add' || type === 'sub') return 50;
+  if ((type === 'mul' || type === 'div') && level === 'hard') return 70;
+  return 30;
 }
 
 // Field width in mm per column layout
@@ -661,7 +664,12 @@ const TEXTS = {
 };
 
 function buildSection(type, label, symbol, pillClass, monsterSrc, count, level) {
-  const gridH = gridHeightMm(type);
+  // Utfordrende multiplikasjon/divisjon trenger mer skriveplass til oppstilt
+  // utregning, så vi begrenser antall oppgaver til maks 2 uansett lærerens valg.
+  if ((type === 'mul' || type === 'div') && level === 'hard') {
+    count = Math.min(count, 2);
+  }
+  const gridH = gridHeightMm(type, level);
   const gridW = fieldWidthMm(type);
 
   let tasks = [];
@@ -920,11 +928,17 @@ const PAGE_CONTENT_BUDGET_MM = 235;
 
 // Estimert høyde i mm per seksjon.
 // add/sub bruker 4-kolonne-layout med fast rutehøyde, så høyden er nær konstant.
-// mul/div bruker 2-kolonne-layout: ceil(count/2) rader à ~37.5mm + overskrift.
+// mul/div bruker 2-kolonne-layout: ceil(count/2) rader, høyde per rad varierer
+// med nivå (utfordrende gir 7 rader = 70mm + padding ≈ 77.5mm per rad).
 // tekstoppgave har ett spørsmål + et 50mm rutenett + padding.
-function estimateSectionHeightMm(type, count) {
+function estimateSectionHeightMm(type, count, level) {
   if (type === 'add' || type === 'sub') return 67;
-  if (type === 'mul' || type === 'div') return 14 + Math.ceil(count / 2) * 37.5;
+  if (type === 'mul' || type === 'div') {
+    // På utfordrende nivå kappes count til 2 (samme logikk som i buildSection)
+    const effectiveCount = level === 'hard' ? Math.min(count, 2) : count;
+    const rowHeight = level === 'hard' ? 77.5 : 37.5;
+    return 14 + Math.ceil(effectiveCount / 2) * rowHeight;
+  }
   if (type === 'txt') return 85;
   return 0;
 }
@@ -965,11 +979,11 @@ function generateWorksheet() {
 
   // Bygg alle valgte seksjoner som {type, html, heightMm}-poster
   const sections = [];
-  if (useAdd) sections.push({type:'add', html: buildSection('add','Addisjon',      '+','pill-add', imgs[imgIdx++], count, lvlAdd), heightMm: estimateSectionHeightMm('add', count)});
-  if (useSub) sections.push({type:'sub', html: buildSection('sub','Subtraksjon',   '−','pill-sub', imgs[imgIdx++], count, lvlSub), heightMm: estimateSectionHeightMm('sub', count)});
-  if (useMul) sections.push({type:'mul', html: buildSection('mul','Multiplikasjon','·','pill-mul', imgs[imgIdx++], count, lvlMul), heightMm: estimateSectionHeightMm('mul', count)});
-  if (useDiv) sections.push({type:'div', html: buildSection('div','Divisjon',      ':','pill-div', imgs[imgIdx++], count, lvlDiv), heightMm: estimateSectionHeightMm('div', count)});
-  if (useTxt) sections.push({type:'txt', html: buildTextSection(imgs[imgIdx++], lvlTxt, allowedOps),                               heightMm: estimateSectionHeightMm('txt', count)});
+  if (useAdd) sections.push({type:'add', html: buildSection('add','Addisjon',      '+','pill-add', imgs[imgIdx++], count, lvlAdd), heightMm: estimateSectionHeightMm('add', count, lvlAdd)});
+  if (useSub) sections.push({type:'sub', html: buildSection('sub','Subtraksjon',   '−','pill-sub', imgs[imgIdx++], count, lvlSub), heightMm: estimateSectionHeightMm('sub', count, lvlSub)});
+  if (useMul) sections.push({type:'mul', html: buildSection('mul','Multiplikasjon','·','pill-mul', imgs[imgIdx++], count, lvlMul), heightMm: estimateSectionHeightMm('mul', count, lvlMul)});
+  if (useDiv) sections.push({type:'div', html: buildSection('div','Divisjon',      ':','pill-div', imgs[imgIdx++], count, lvlDiv), heightMm: estimateSectionHeightMm('div', count, lvlDiv)});
+  if (useTxt) sections.push({type:'txt', html: buildTextSection(imgs[imgIdx++], lvlTxt, allowedOps),                               heightMm: estimateSectionHeightMm('txt', count, lvlTxt)});
 
   // Standardfordeling: add/sub/mul på side 1, div/tekst på side 2
   const page1Types = new Set(['add','sub','mul']);
