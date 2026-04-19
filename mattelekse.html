@@ -276,6 +276,9 @@ body {
 }
 .footer-monster { width: 9mm; height: 9mm; object-fit: contain; filter: drop-shadow(0 0.5mm 1.5mm rgba(0,0,0,0.15)); }
 
+/* Separator between pages on screen */
+.worksheet + .worksheet { margin-top: 24px; }
+
 /* ── PRINT ── */
 @media print {
   @page { size: A4; margin: 0; }
@@ -290,8 +293,14 @@ body {
     max-height: 297mm !important;
     margin: 0 !important;
     transform: none !important;
-    page-break-after: avoid;
     overflow: hidden;
+    page-break-after: always;
+    break-after: page;
+  }
+  /* Siste side skal ikke tvinge ny side etter seg */
+  .worksheet:last-of-type {
+    page-break-after: avoid;
+    break-after: avoid;
   }
   .ws-corner img { opacity: 0.08 !important; }
 }
@@ -375,45 +384,7 @@ body {
 
 <!-- WORKSHEET -->
 <div id="worksheet-wrap">
-<div class="worksheet" id="worksheet">
-
-  <div class="ws-corner tl"><img id="corner-tl" src="" alt=""></div>
-  <div class="ws-corner tr"><img id="corner-tr" src="" alt=""></div>
-  <div class="ws-corner bl"><img id="corner-bl" src="" alt=""></div>
-  <div class="ws-corner br"><img id="corner-br" src="" alt=""></div>
-
-  <div class="ws-content">
-
-    <div class="ws-header">
-      <div class="ws-header-left">
-        <img class="ws-header-monster" id="header-monster" src="" alt="">
-        <div>
-          <div class="ws-title-text">Mattelekse</div>
-          <div class="ws-subtitle" id="ws-class-sub">3. trinn</div>
-        </div>
-      </div>
-      <div class="ws-week-pill" id="ws-week-pill">Uke 17</div>
-    </div>
-
-    <div class="ws-info-row">
-      <div class="ws-info-field">Navn:&nbsp;</div>
-      <div class="ws-info-field">Dato:&nbsp;</div>
-      <div class="ws-info-field">Klasse:&nbsp;<span id="ws-class-inline" style="font-weight:900;color:#222">3. trinn</span></div>
-    </div>
-
-    <!-- Sections injected by JS -->
-    <div id="ws-sections"></div>
-
-    <div class="ws-footer">
-      <div style="display:flex;align-items:center;gap:2mm">
-        <img class="footer-monster" id="footer-monster" src="" alt="">
-        <span>Myntland Mattelekse</span>
-      </div>
-      <span id="ws-class-footer">3. trinn</span>
-    </div>
-
-  </div>
-</div>
+  <!-- Sider genereres dynamisk av JS (1 eller 2 sider ved behov) -->
 </div>
 
 <script>
@@ -575,6 +546,57 @@ function buildTextSection(monsterSrc, level) {
     </div>`;
 }
 
+// Bygger HTML for én worksheet-side (med header, info-rad, seksjoner, footer og hjørnedekor)
+function buildPage(opts) {
+  const {
+    week, cls, sectionsHtml,
+    headerMonster, footerMonster,
+    cornerTl, cornerTr, cornerBl, cornerBr,
+    pageLabel // f.eks. "Side 1 av 2" eller null
+  } = opts;
+
+  const pageIndicator = pageLabel
+    ? `<span style="margin-right:3mm;color:#bbb;font-weight:800">${pageLabel}</span>`
+    : '';
+
+  return `
+<div class="worksheet">
+  <div class="ws-corner tl"><img src="${cornerTl}" alt=""></div>
+  <div class="ws-corner tr"><img src="${cornerTr}" alt=""></div>
+  <div class="ws-corner bl"><img src="${cornerBl}" alt=""></div>
+  <div class="ws-corner br"><img src="${cornerBr}" alt=""></div>
+
+  <div class="ws-content">
+    <div class="ws-header">
+      <div class="ws-header-left">
+        <img class="ws-header-monster" src="${headerMonster}" alt="">
+        <div>
+          <div class="ws-title-text">Mattelekse</div>
+          <div class="ws-subtitle">${cls}</div>
+        </div>
+      </div>
+      <div class="ws-week-pill">Uke ${week}</div>
+    </div>
+
+    <div class="ws-info-row">
+      <div class="ws-info-field">Navn:&nbsp;</div>
+      <div class="ws-info-field">Dato:&nbsp;</div>
+      <div class="ws-info-field">Klasse:&nbsp;<span style="font-weight:900;color:#222">${cls}</span></div>
+    </div>
+
+    <div>${sectionsHtml}</div>
+
+    <div class="ws-footer">
+      <div style="display:flex;align-items:center;gap:2mm">
+        <img class="footer-monster" src="${footerMonster}" alt="">
+        <span>Myntland Mattelekse</span>
+      </div>
+      <div>${pageIndicator}<span>${cls}</span></div>
+    </div>
+  </div>
+</div>`;
+}
+
 function generateWorksheet() {
   const week   = parseInt(document.getElementById('ctrl-week').value)||17;
   const cls    = document.getElementById('ctrl-class').value||'3. trinn';
@@ -591,28 +613,59 @@ function generateWorksheet() {
     alert('Velg minst én regneart!'); return;
   }
 
-  document.getElementById('ws-week-pill').textContent = 'Uke ' + week;
-  document.getElementById('ws-class-sub').textContent = cls;
-  document.getElementById('ws-class-inline').textContent = cls;
-  document.getElementById('ws-class-footer').textContent = cls;
+  // Plukk nok monster-bilder til begge sidene (maks 24)
+  const imgs = pickN(24);
 
-  const imgs = pickN(12);
-  document.getElementById('header-monster').src = imgs[0];
-  document.getElementById('footer-monster').src = imgs[7];
-  document.getElementById('corner-tl').src = imgs[8];
-  document.getElementById('corner-tr').src = imgs[9];
-  document.getElementById('corner-bl').src = imgs[10];
-  document.getElementById('corner-br').src = imgs[11];
-
-  let html = '';
+  // Bygg seksjonene for side 1: addisjon, subtraksjon, multiplikasjon
+  let page1Html = '';
   let imgIdx = 1;
-  if (useAdd) html += buildSection('add', 'Addisjon',       '+', 'pill-add', imgs[imgIdx++], count, level);
-  if (useSub) html += buildSection('sub', 'Subtraksjon',    '−', 'pill-sub', imgs[imgIdx++], count, level);
-  if (useMul) html += buildSection('mul', 'Multiplikasjon', '·', 'pill-mul', imgs[imgIdx++], count, level);
-  if (useDiv) html += buildSection('div', 'Divisjon',       ':', 'pill-div', imgs[imgIdx++], count, level);
-  if (useTxt) html += buildTextSection(imgs[imgIdx++], level);
+  if (useAdd) page1Html += buildSection('add', 'Addisjon',       '+', 'pill-add', imgs[imgIdx++], count, level);
+  if (useSub) page1Html += buildSection('sub', 'Subtraksjon',    '−', 'pill-sub', imgs[imgIdx++], count, level);
+  if (useMul) page1Html += buildSection('mul', 'Multiplikasjon', '·', 'pill-mul', imgs[imgIdx++], count, level);
 
-  document.getElementById('ws-sections').innerHTML = html;
+  // Bygg seksjonene for side 2: divisjon og tekstoppgave
+  let page2Html = '';
+  if (useDiv) page2Html += buildSection('div', 'Divisjon',       ':', 'pill-div', imgs[imgIdx++], count, level);
+  if (useTxt) page2Html += buildTextSection(imgs[imgIdx++], level);
+
+  // Avgjør om vi trenger to sider
+  const hasPage1 = page1Html.length > 0;
+  const hasPage2 = page2Html.length > 0;
+  const twoPages = hasPage1 && hasPage2;
+
+  // Hvis bare side 2-innhold er valgt, flytt det til side 1 så vi aldri har en tom første side
+  if (!hasPage1 && hasPage2) {
+    page1Html = page2Html;
+    page2Html = '';
+  }
+
+  const wrap = document.getElementById('worksheet-wrap');
+  let html = '';
+
+  html += buildPage({
+    week, cls,
+    sectionsHtml: page1Html,
+    headerMonster: imgs[0],
+    footerMonster: imgs[7],
+    cornerTl: imgs[8],  cornerTr: imgs[9],
+    cornerBl: imgs[10], cornerBr: imgs[11],
+    pageLabel: twoPages ? 'Side 1 av 2' : null
+  });
+
+  if (twoPages) {
+    html += buildPage({
+      week, cls,
+      sectionsHtml: page2Html,
+      // Bruk andre monster-bilder for side 2 så det blir variasjon
+      headerMonster: imgs[12],
+      footerMonster: imgs[13],
+      cornerTl: imgs[14], cornerTr: imgs[15],
+      cornerBl: imgs[16], cornerBr: imgs[17],
+      pageLabel: 'Side 2 av 2'
+    });
+  }
+
+  wrap.innerHTML = html;
 }
 
 // Init parade
