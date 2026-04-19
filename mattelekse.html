@@ -458,22 +458,25 @@ function fieldWidthMm(type) {
 
 const TEXTS = {
   easy:[
-    {t:(a,b)=>`Monsteret har ${a} epler og får ${b} til. Hvor mange epler har det nå?`},
-    {t:(a,b)=>`Det er ${a} drager i skogen. ${b} av dem flyr bort. Hvor mange er igjen?`,c:(a,b)=>a>b},
-    {t:(a,b)=>`Monsteret finner ${a} steiner på stranden og ${b} i skogen. Hvor mange er det til sammen?`},
-    {t:(a,b)=>`Det bor ${a} monstre i en hule. ${b} av dem går ut for å leke. Hvor mange er igjen?`,c:(a,b)=>a>b},
+    {op:'add', t:(a,b)=>`Monsteret har ${a} epler og får ${b} til. Hvor mange epler har det nå?`},
+    {op:'sub', t:(a,b)=>`Det er ${a} drager i skogen. ${b} av dem flyr bort. Hvor mange er igjen?`,c:(a,b)=>a>b},
+    {op:'add', t:(a,b)=>`Monsteret finner ${a} steiner på stranden og ${b} i skogen. Hvor mange er det til sammen?`},
+    {op:'sub', t:(a,b)=>`Det bor ${a} monstre i en hule. ${b} av dem går ut for å leke. Hvor mange er igjen?`,c:(a,b)=>a>b},
+    {op:'mul', t:(a,b)=>`Hvert monster har ${a} ballonger. Hvor mange ballonger har ${b} monstre til sammen?`},
+    {op:'div', t:(a,b)=>`Monsteret har ${a} kjeks og deler dem likt på ${b} tallerkener. Hvor mange kjeks blir det på hver?`,c:(a,b)=>a%b===0},
   ],
   medium:[
-    {t:(a,b)=>`Monsteret har ${a} mynter og bruker ${b} på godteri. Hvor mange mynter er igjen?`,c:(a,b)=>a>b},
-    {t:(a,b)=>`En drage flyr ${a} km per dag. Hvor langt flyr den på ${b} dager?`},
-    {t:(a,b)=>`${a} monster-bær deles likt mellom ${b} monstre. Hvor mange bær får hvert monster?`,c:(a,b)=>a%b===0},
-    {t:(a,b)=>`Monsterskolen har ${a} elever. ${b} er hjemme syke. Hvor mange er på skolen i dag?`,c:(a,b)=>a>b},
+    {op:'add', t:(a,b)=>`Monsteret plukker ${a} blåbær før lunsj og ${b} etter lunsj. Hvor mange blåbær har det plukket totalt?`},
+    {op:'sub', t:(a,b)=>`Monsteret har ${a} mynter og bruker ${b} på godteri. Hvor mange mynter er igjen?`,c:(a,b)=>a>b},
+    {op:'mul', t:(a,b)=>`En drage flyr ${a} km per dag. Hvor langt flyr den på ${b} dager?`},
+    {op:'div', t:(a,b)=>`${a} monster-bær deles likt mellom ${b} monstre. Hvor mange bær får hvert monster?`,c:(a,b)=>a%b===0},
+    {op:'sub', t:(a,b)=>`Monsterskolen har ${a} elever. ${b} er hjemme syke. Hvor mange er på skolen i dag?`,c:(a,b)=>a>b},
   ],
   hard:[
-    {t:(a,b)=>`Monsteret samler ${a} gullmynter den ene uken og ${b} den neste. Hvor mange har det til sammen?`},
-    {t:(a,b)=>`Et romskip frakter ${a} monstre per tur. Hvor mange fraktes på ${b} turer?`},
-    {t:(a,b)=>`${a} monster-egg legges i kasser med ${b} per kasse. Hvor mange kasser trengs?`,c:(a,b)=>a%b===0},
-    {t:(a,b)=>`Monsterbyen har ${a} innbyggere. ${b} reiser bort på ferie. Hvor mange blir igjen?`,c:(a,b)=>a>b},
+    {op:'add', t:(a,b)=>`Monsteret samler ${a} gullmynter den ene uken og ${b} den neste. Hvor mange har det til sammen?`},
+    {op:'sub', t:(a,b)=>`Monsterbyen har ${a} innbyggere. ${b} reiser bort på ferie. Hvor mange blir igjen?`,c:(a,b)=>a>b},
+    {op:'mul', t:(a,b)=>`Et romskip frakter ${a} monstre per tur. Hvor mange fraktes på ${b} turer?`},
+    {op:'div', t:(a,b)=>`${a} monster-egg legges i kasser med ${b} per kasse. Hvor mange kasser trengs?`,c:(a,b)=>a%b===0},
   ]
 };
 
@@ -519,9 +522,16 @@ function buildSection(type, label, symbol, pillClass, monsterSrc, count, level) 
     <div class="${gridClass}">${tasks.join('')}</div>`;
 }
 
-function buildTextSection(monsterSrc, level) {
+function buildTextSection(monsterSrc, level, allowedOps) {
   const [mn,mx] = getRange(level);
-  const pool = TEXTS[level];
+  const fullPool = TEXTS[level];
+
+  // Filtrer poolen til kun maler som matcher valgte regnearter.
+  // Fallback: hvis ingen maler matcher (f.eks. brukeren valgte bare "tekstoppgave"
+  // uten andre regnearter), bruk hele poolen.
+  let pool = fullPool.filter(tmpl => allowedOps.includes(tmpl.op));
+  if (pool.length === 0) pool = fullPool;
+
   const tmpl = pool[rand(0,pool.length-1)];
   let a,b,tries=0;
   do{a=rand(mn,mx);b=rand(2,Math.min(mx,a));tries++;}
@@ -597,6 +607,20 @@ function buildPage(opts) {
 </div>`;
 }
 
+// Omtrentlig høydebudsjett for innholdet på én A4-side (297mm minus padding/header/info/footer)
+const PAGE_CONTENT_BUDGET_MM = 235;
+
+// Estimert høyde i mm per seksjon.
+// add/sub bruker 4-kolonne-layout med fast rutehøyde, så høyden er nær konstant.
+// mul/div bruker 2-kolonne-layout: ceil(count/2) rader à ~37.5mm + overskrift.
+// tekstoppgave har ett spørsmål + et 50mm rutenett + padding.
+function estimateSectionHeightMm(type, count) {
+  if (type === 'add' || type === 'sub') return 67;
+  if (type === 'mul' || type === 'div') return 14 + Math.ceil(count / 2) * 37.5;
+  if (type === 'txt') return 85;
+  return 0;
+}
+
 function generateWorksheet() {
   const week   = parseInt(document.getElementById('ctrl-week').value)||17;
   const cls    = document.getElementById('ctrl-class').value||'3. trinn';
@@ -613,31 +637,49 @@ function generateWorksheet() {
     alert('Velg minst én regneart!'); return;
   }
 
+  // Hvilke regnearter er valgt (brukes til å filtrere tekstoppgavepoolen
+  // så tekstoppgaven kun inneholder operasjoner eleven jobber med)
+  const allowedOps = [];
+  if (useAdd) allowedOps.push('add');
+  if (useSub) allowedOps.push('sub');
+  if (useMul) allowedOps.push('mul');
+  if (useDiv) allowedOps.push('div');
+
   // Plukk nok monster-bilder til begge sidene (maks 24)
   const imgs = pickN(24);
-
-  // Bygg seksjonene for side 1: addisjon, subtraksjon, multiplikasjon
-  let page1Html = '';
   let imgIdx = 1;
-  if (useAdd) page1Html += buildSection('add', 'Addisjon',       '+', 'pill-add', imgs[imgIdx++], count, level);
-  if (useSub) page1Html += buildSection('sub', 'Subtraksjon',    '−', 'pill-sub', imgs[imgIdx++], count, level);
-  if (useMul) page1Html += buildSection('mul', 'Multiplikasjon', '·', 'pill-mul', imgs[imgIdx++], count, level);
 
-  // Bygg seksjonene for side 2: divisjon og tekstoppgave
-  let page2Html = '';
-  if (useDiv) page2Html += buildSection('div', 'Divisjon',       ':', 'pill-div', imgs[imgIdx++], count, level);
-  if (useTxt) page2Html += buildTextSection(imgs[imgIdx++], level);
+  // Bygg alle valgte seksjoner som {type, html, heightMm}-poster
+  const sections = [];
+  if (useAdd) sections.push({type:'add', html: buildSection('add','Addisjon',      '+','pill-add', imgs[imgIdx++], count, level), heightMm: estimateSectionHeightMm('add', count)});
+  if (useSub) sections.push({type:'sub', html: buildSection('sub','Subtraksjon',   '−','pill-sub', imgs[imgIdx++], count, level), heightMm: estimateSectionHeightMm('sub', count)});
+  if (useMul) sections.push({type:'mul', html: buildSection('mul','Multiplikasjon','·','pill-mul', imgs[imgIdx++], count, level), heightMm: estimateSectionHeightMm('mul', count)});
+  if (useDiv) sections.push({type:'div', html: buildSection('div','Divisjon',      ':','pill-div', imgs[imgIdx++], count, level), heightMm: estimateSectionHeightMm('div', count)});
+  if (useTxt) sections.push({type:'txt', html: buildTextSection(imgs[imgIdx++], level, allowedOps),                                heightMm: estimateSectionHeightMm('txt', count)});
 
-  // Avgjør om vi trenger to sider
-  const hasPage1 = page1Html.length > 0;
-  const hasPage2 = page2Html.length > 0;
-  const twoPages = hasPage1 && hasPage2;
+  // Standardfordeling: add/sub/mul på side 1, div/tekst på side 2
+  const page1Types = new Set(['add','sub','mul']);
+  let page1 = sections.filter(s => page1Types.has(s.type));
+  let page2 = sections.filter(s => !page1Types.has(s.type));
 
-  // Hvis bare side 2-innhold er valgt, flytt det til side 1 så vi aldri har en tom første side
-  if (!hasPage1 && hasPage2) {
-    page1Html = page2Html;
-    page2Html = '';
+  // Smart sammenslåing: hvis alt får plass på én side, samle det der.
+  // Dette dekker både tilfellet "bare addisjon + subtraksjon + tekstoppgave"
+  // og andre kombinasjoner der side 2-innholdet lett får plass på side 1.
+  const totalHeight = sections.reduce((sum, s) => sum + s.heightMm, 0);
+  if (totalHeight <= PAGE_CONTENT_BUDGET_MM) {
+    page1 = sections;
+    page2 = [];
   }
+
+  // Hvis side 1 er tom (brukeren valgte bare div/tekst), flytt side 2-innhold opp
+  if (page1.length === 0 && page2.length > 0) {
+    page1 = page2;
+    page2 = [];
+  }
+
+  const page1Html = page1.map(s => s.html).join('');
+  const page2Html = page2.map(s => s.html).join('');
+  const twoPages = page2Html.length > 0;
 
   const wrap = document.getElementById('worksheet-wrap');
   let html = '';
