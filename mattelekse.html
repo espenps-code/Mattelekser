@@ -200,7 +200,7 @@ body {
   width: 210mm;
   min-height: 297mm;
   margin: 0 auto;
-  padding: 14mm 16mm 12mm;
+  padding: 10mm 16mm 14mm;
   border-radius: 10px;
   box-shadow: 0 24px 70px rgba(0,0,0,0.55);
   position: relative;
@@ -318,16 +318,20 @@ body {
 
 /* ── PRINT ── */
 @media print {
-  @page { size: A4; margin: 0; }
+  /* Gi skriveren en liten sikkerhetssone (6mm) langs kantene så
+     bunntekst og andre elementer ikke havner i den ikke-utskrivbare
+     sonen på fysiske printere. Vi kompenserer for marginen i selve
+     .worksheet ved å trekke fra bredden/høyden. */
+  @page { size: A4; margin: 6mm; }
   body { background: none !important; padding: 0 !important; margin: 0; }
   .screen-only { display: none !important; }
   #worksheet-wrap { max-width: none; margin: 0; }
   .worksheet {
     box-shadow: none !important;
     border-radius: 0 !important;
-    width: 210mm !important;
-    min-height: 297mm !important;
-    max-height: 297mm !important;
+    width: 198mm !important;           /* 210 − 2·6 */
+    min-height: 285mm !important;      /* 297 − 2·6 */
+    max-height: 285mm !important;
     margin: 0 !important;
     transform: none !important;
     overflow: hidden;
@@ -924,7 +928,11 @@ function buildPage(opts) {
 }
 
 // Omtrentlig høydebudsjett for innholdet på én A4-side (297mm minus padding/header/info/footer)
-const PAGE_CONTENT_BUDGET_MM = 235;
+// Omtrentlig høydebudsjett for innholdet på én A4-side.
+// Ved utskrift har vi 285mm tilgjengelig (297mm − 2·6mm @page margin),
+// minus worksheet-padding (10mm topp + 14mm bunn = 24mm),
+// minus header+info+footer (ca. 28mm). Gir ca. 230mm for seksjoner.
+const PAGE_CONTENT_BUDGET_MM = 230;
 
 // Estimert høyde i mm per seksjon.
 // add/sub bruker 4-kolonne-layout med fast rutehøyde, så høyden er nær konstant.
