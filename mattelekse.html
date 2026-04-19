@@ -270,6 +270,7 @@ body {
 
 /* Task grid */
 .tasks-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2.5mm 5mm; }
+.tasks-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2.5mm 5mm; }
 .tasks-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2.5mm 3mm; }
 .task-problem {
   font-family: 'Fredoka One', cursive; font-size: 5mm; color: var(--ink);
@@ -511,10 +512,14 @@ function gridHeightMm(type, level) {
 }
 
 // Field width in mm per column layout
-function fieldWidthMm(type) {
+function fieldWidthMm(type, count) {
   // 4-col: (178 - 3*3) / 4 = 169/4 ≈ 42
   // 2-col: (178 - 1*5) / 2 = 173/2 ≈ 86
-  return (type === 'add' || type === 'sub') ? 42 : 86;
+  // add/sub med 2 oppgaver: 2 kolonner → 86mm per felt (dobbel bredde)
+  if (type === 'add' || type === 'sub') {
+    return count === 2 ? 86 : 42;
+  }
+  return 86;
 }
 
 // Hjelpere for tekstoppgaver: velg tall fra et område + valgfri "snap" til fine verdier
@@ -674,7 +679,7 @@ function buildSection(type, label, symbol, pillClass, monsterSrc, count, level) 
     count = Math.min(count, 2);
   }
   const gridH = gridHeightMm(type, level);
-  const gridW = fieldWidthMm(type);
+  const gridW = fieldWidthMm(type, count);
 
   let tasks = [];
   for (let i = 0; i < count; i++) {
@@ -737,7 +742,15 @@ function buildSection(type, label, symbol, pillClass, monsterSrc, count, level) 
       </div>`);
   }
 
-  const gridClass = (type === 'add' || type === 'sub') ? 'tasks-grid-4' : 'tasks-grid';
+  // Velg grid-layout: add/sub med 2 oppgaver bruker 2 kolonner (oppgavene
+  // får dobbel bredde og ligger på én linje), ellers 4 kolonner. Mul/div
+  // bruker alltid 2 kolonner.
+  let gridClass;
+  if (type === 'add' || type === 'sub') {
+    gridClass = count === 2 ? 'tasks-grid-2' : 'tasks-grid-4';
+  } else {
+    gridClass = 'tasks-grid';
+  }
   return `
     <div class="section-hd">
       <div class="section-pill ${pillClass}">
