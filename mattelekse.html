@@ -510,46 +510,153 @@ function fieldWidthMm(type) {
   return (type === 'add' || type === 'sub') ? 42 : 86;
 }
 
+// Hjelpere for tekstoppgaver: velg tall fra et område + valgfri "snap" til fine verdier
+function rr(min, max) { return rand(min, max); }
+// Velg et "pent" tall i området [min, max] som er delelig med step (f.eks. 5, 10)
+function niceNum(min, max, step) {
+  const lo = Math.ceil(min / step), hi = Math.floor(max / step);
+  return rr(lo, hi) * step;
+}
+// Tilfeldig element fra array
+function pick(arr) { return arr[rr(0, arr.length - 1)]; }
+
+// Realistiske tekstoppgaver. Hver mal har sin egen pick() som velger tall
+// tilpasset scenarioet (en is koster 20–50 kr, ikke 399 kr).
 const TEXTS = {
   easy:[
-    // Kun addisjon og subtraksjon med 2+2 siffer (10–99)
-    {op:'add', t:(a,b)=>`Monsteret har ${a} epler og får ${b} til. Hvor mange epler har det nå?`},
-    {op:'sub', t:(a,b)=>`Det er ${a} drager i skogen. ${b} av dem flyr bort. Hvor mange er igjen?`,c:(a,b)=>a>b},
-    {op:'add', t:(a,b)=>`Monsteret finner ${a} steiner på stranden og ${b} i skogen. Hvor mange er det til sammen?`},
-    {op:'sub', t:(a,b)=>`Det bor ${a} monstre i en hule. ${b} av dem går ut for å leke. Hvor mange er igjen?`,c:(a,b)=>a>b},
-    {op:'add', t:(a,b)=>`I dag fant monsteret ${a} blåbær, og i går fant det ${b}. Hvor mange blåbær har det funnet til sammen?`},
-    {op:'sub', t:(a,b)=>`Monsteret bakte ${a} kaker. Vennene spiste ${b} av dem. Hvor mange kaker er igjen?`,c:(a,b)=>a>b},
+    // Kun addisjon og subtraksjon. Tall 10–99, hverdagsnære tellbare ting.
+    {op:'add', pick:()=>[rr(12,60), rr(10,40)],
+      t:(a,b)=>`Lukas har ${a} klinkekuler. Han får ${b} til av bestefar. Hvor mange klinkekuler har han nå?`},
+    {op:'sub', pick:()=>{const a=rr(30,95); return [a, rr(5, a-5)];},
+      t:(a,b)=>`Ida har ${a} klistremerker. Hun gir ${b} til lillesøster. Hvor mange har hun igjen?`},
+    {op:'add', pick:()=>[rr(15,60), rr(10,40)],
+      t:(a,b)=>`I klassen er det ${a} gutter og ${b} jenter. Hvor mange elever er det i klassen til sammen?`},
+    {op:'sub', pick:()=>{const a=rr(40,95); return [a, rr(10, a-10)];},
+      t:(a,b)=>`Det er ${a} bøker i bokhyllen. ${b} blir lånt ut. Hvor mange bøker står igjen i hyllen?`},
+    {op:'add', pick:()=>[rr(15,50), rr(10,45)],
+      t:(a,b)=>`Emma plukket ${a} blåbær i går og ${b} blåbær i dag. Hvor mange har hun plukket til sammen?`},
+    {op:'sub', pick:()=>{const a=rr(25,70); return [a, rr(5, a-5)];},
+      t:(a,b)=>`Noa bakte ${a} boller. Familien spiste ${b} til kveldsmat. Hvor mange boller er igjen?`},
+    {op:'add', pick:()=>[rr(20,60), rr(10,40)],
+      t:(a,b)=>`Det står ${a} biler på parkeringsplassen. Så kjører ${b} nye biler inn. Hvor mange biler er det nå?`},
+    {op:'sub', pick:()=>{const a=rr(30,90); return [a, rr(10, a-10)];},
+      t:(a,b)=>`På fotballaget er det ${a} spillere. ${b} er forkjølet i dag. Hvor mange kan spille kampen?`},
   ],
   medium:[
-    // Middels-nivå fra alle regnearter
-    {op:'add', t:(a,b)=>`Monsteret plukker ${a} blåbær før lunsj og ${b} etter lunsj. Hvor mange blåbær har det plukket totalt?`},
-    {op:'sub', t:(a,b)=>`Monsteret har ${a} mynter og bruker ${b} på godteri. Hvor mange mynter er igjen?`,c:(a,b)=>a>b},
-    {op:'mul', t:(a,b)=>`En drage flyr ${a} km per dag. Hvor langt flyr den på ${b} dager?`},
-    {op:'div', t:(a,b)=>`${a} monster-bær deles likt mellom ${b} monstre. Hvor mange bær får hvert monster?`,c:(a,b)=>a%b===0},
-    {op:'sub', t:(a,b)=>`Monsterskolen har ${a} elever. ${b} er hjemme syke. Hvor mange er på skolen i dag?`,c:(a,b)=>a>b},
-    {op:'mul', t:(a,b)=>`På et monsterkurs er det ${a} elever i hver klasse. Hvor mange elever er det i ${b} klasser?`},
-    {op:'div', t:(a,b)=>`Monsteret har ${a} kroner og vil dele dem likt i ${b} sparebøsser. Hvor mye blir det i hver?`,c:(a,b)=>a%b===0},
+    // Middels: alle fire regnearter, hverdagsnære scenarioer
+    // ADDISJON: tellinger, avstander, poeng
+    {op:'add', pick:()=>[rr(120,600), rr(80,500)],
+      t:(a,b)=>`På skoleturen gikk elevene ${a} meter om formiddagen og ${b} meter om ettermiddagen. Hvor mange meter gikk de til sammen?`},
+    {op:'add', pick:()=>[rr(150,450), rr(100,400)],
+      t:(a,b)=>`På loppemarkedet ble det solgt ${a} bøker på lørdag og ${b} bøker på søndag. Hvor mange bøker ble solgt i helgen?`},
+    // SUBTRAKSJON
+    {op:'sub', pick:()=>{const a=rr(200,900); return [a, rr(50, a-50)];},
+      t:(a,b)=>`Biblioteket har ${a} barnebøker. ${b} er lånt ut akkurat nå. Hvor mange står på hyllene?`},
+    {op:'sub', pick:()=>{const a=rr(300,900); return [a, rr(100, a-100)];},
+      t:(a,b)=>`Skolen har ${a} elever. ${b} av dem er på klassetur. Hvor mange er igjen på skolen i dag?`},
+    // MULTIPLIKASJON (største tall først, jf. Middels-spec)
+    {op:'mul', pick:()=>[niceNum(20,50,5), rr(3,9)],
+      t:(a,b)=>`En skoleklasse går ${a} minutter til svømmehallen. Hvor mange minutter bruker de på å gå tur-retur i løpet av ${b} uker når de går én gang i uken? (Én tur-retur per uke)`},
+    {op:'mul', pick:()=>[rr(15,40), rr(4,8)],
+      t:(a,b)=>`I en eske er det ${a} blyanter. Hvor mange blyanter er det i ${b} slike esker?`},
+    {op:'mul', pick:()=>[rr(20,45), rr(5,9)],
+      t:(a,b)=>`På idrettsdagen løp hver elev ${a} runder. Hvor mange runder løp ${b} elever til sammen?`},
+    // DIVISJON
+    {op:'div', pick:()=>{const b=rr(3,8), k=rr(4,15); return [b*k, b];},
+      t:(a,b)=>`${a} elever skal deles likt inn i ${b} lag. Hvor mange elever blir det på hvert lag?`,c:(a,b)=>a%b===0},
+    {op:'div', pick:()=>{const b=rr(4,10), k=rr(5,12); return [b*k, b];},
+      t:(a,b)=>`En bonde skal fordele ${a} egg likt i ${b} kartonger. Hvor mange egg blir det i hver kartong?`,c:(a,b)=>a%b===0},
+    {op:'div', pick:()=>{const b=rr(2,6), k=rr(8,20); return [b*k, b];},
+      t:(a,b)=>`Mia sparer ${a} kr og vil dele beløpet likt over ${b} måneder. Hvor mye kan hun bruke per måned?`,c:(a,b)=>a%b===0},
   ],
   hard:[
-    // Utfordrende regneoppgaver fra alle regnearter
-    {op:'add', t:(a,b)=>`Monsteret samler ${a} gullmynter den ene uken og ${b} den neste. Hvor mange har det til sammen?`},
-    {op:'sub', t:(a,b)=>`Monsterbyen har ${a} innbyggere. ${b} reiser bort på ferie. Hvor mange blir igjen?`,c:(a,b)=>a>b},
-    {op:'mul', t:(a,b)=>`Et romskip frakter ${a} monstre per tur. Hvor mange fraktes på ${b} turer?`},
-    {op:'div', t:(a,b)=>`${a} monster-egg legges i kasser med ${b} per kasse. Hvor mange kasser trengs?`,c:(a,b)=>a%b===0},
-    // Økonomi (prisregning, veksel, lønn)
-    {op:'eco', t:(a,b)=>`Monsteret kjøper ${b} iskrem til ${a} kr per stykk. Hvor mye må det betale totalt?`},
-    {op:'eco', t:(a,b)=>`Monsteret har ${a} kr og kjøper en leke til ${b} kr. Hvor mye har det igjen?`,c:(a,b)=>a>b},
-    {op:'eco', t:(a,b)=>`Drageren tjener ${a} kr i timen og jobber ${b} timer. Hvor mye tjener den totalt?`},
-    // Brøk
-    {op:'frac', t:(a,b)=>`Monsteret har ${a} kjeks og spiser ${b==2?'halvparten':(b==4?'en fjerdedel':'en tredjedel')} av dem. Hvor mange kjeks spiste det?`,c:(a,b)=>[2,3,4].includes(b)&&a%b===0},
-    {op:'frac', t:(a,b)=>`Det er ${a} liter saft i en stor flaske. Monsteret drikker ${b==2?'halvparten':(b==4?'en fjerdedel':'en tredjedel')}. Hvor mange liter er igjen?`,c:(a,b)=>[2,3,4].includes(b)&&a%b===0},
-    // Prosent
-    {op:'pct', t:(a,b)=>`En jakke koster ${a} kr. Butikken gir ${b}% rabatt. Hvor mye må monsteret betale?`,c:(a,b)=>[10,20,25,50].includes(b)&&(a*(100-b))%100===0},
-    {op:'pct', t:(a,b)=>`Monsteret har ${a} kr på sparekontoen og får ${b}% i rente. Hvor mye er rentene?`,c:(a,b)=>[5,10,20,25].includes(b)&&(a*b)%100===0},
-    // Måling (lengde, tid, vekt)
-    {op:'meas', t:(a,b)=>`Monsteret løper ${a} meter hver dag. Hvor mange kilometer løper det på ${b} dager? (Svar i km)`,c:(a,b)=>a%1000===0||(a*b)%1000===0},
-    {op:'meas', t:(a,b)=>`En drage veier ${a} kg og en annen veier ${b} kg. Hvor mye veier de til sammen? (Svar i kg)`},
-    {op:'meas', t:(a,b)=>`Turen tar ${a} minutter én vei. Hvor mange timer og minutter tar det tur-retur ${b} ganger?`,c:(a,b)=>a>=30&&a<=180},
+    // ────── Vanlige regnearter (utfordrende tall) ──────
+    {op:'add', pick:()=>[rr(1500,8000), rr(800,5000)],
+      t:(a,b)=>`En familie kjører ${a} km på sommerferien og ${b} km på vinterferien. Hvor mange kilometer har de kjørt til sammen?`},
+    {op:'sub', pick:()=>{const a=rr(2000,9000); return [a, rr(500, a-500)];},
+      t:(a,b)=>`Et idrettsarrangement hadde ${a} tilskuere i fjor. I år var det ${b}. Hvor mange færre tilskuere var det i år?`,c:(a,b)=>a>b},
+    {op:'mul', pick:()=>[rr(10,99), rr(10,99)],
+      t:(a,b)=>`En skolebuss kjører ${a} km hver dag. Hvor mange kilometer kjører den på ${b} dager?`},
+    {op:'div', pick:()=>{const b=rr(6,25), k=rr(8,40); return [b*k, b];},
+      t:(a,b)=>`En forening har ${a} kr i kassen. Pengene skal fordeles likt mellom ${b} medlemmer. Hvor mye får hver?`,c:(a,b)=>a%b===0},
+
+    // ────── ØKONOMI: handel, veksel, lønn, strøm, abonnement ──────
+    // Matvarer/små kjøp (is, frukt, melk)
+    {op:'eco', pick:()=>[niceNum(20,40,5), rr(3,8)],
+      t:(a,b)=>`En is koster ${a} kr. Hvor mye koster ${b} is til vennegjengen?`},
+    {op:'eco', pick:()=>[niceNum(25,55,5), rr(4,10)],
+      t:(a,b)=>`En liter melk koster ${a} kr. Hvor mye koster ${b} liter melk?`},
+    // Kino, pizza, restaurant
+    {op:'eco', pick:()=>[niceNum(120,180,10), rr(3,6)],
+      t:(a,b)=>`En kinobillett koster ${a} kr. Hvor mye koster det for ${b} personer å gå på kino?`},
+    {op:'eco', pick:()=>[niceNum(180,280,10), rr(2,5)],
+      t:(a,b)=>`En familiepizza koster ${a} kr. Hva blir prisen for ${b} pizzaer til klassefesten?`},
+    // Veksel
+    {op:'eco', pick:()=>{const a=niceNum(500,2000,50); return [a, niceNum(150,Math.min(a-50,800),10)];},
+      t:(a,b)=>`Sara har ${a} kr i lommeboken. Hun kjøper en bok til ${b} kr. Hvor mye har hun igjen?`,c:(a,b)=>a>b},
+    {op:'eco', pick:()=>{const a=niceNum(1000,3000,100); return [a, niceNum(300,Math.min(a-100,1500),50)];},
+      t:(a,b)=>`Jonas har spart ${a} kr. Han kjøper et spill til ${b} kr. Hvor mye har han igjen?`,c:(a,b)=>a>b},
+    // Lønn/jobb
+    {op:'eco', pick:()=>[niceNum(150,220,10), rr(4,8)],
+      t:(a,b)=>`En ungdom tjener ${a} kr i timen på sommerjobb. Hvor mye tjener hun på en arbeidsdag med ${b} timer?`},
+    {op:'eco', pick:()=>[niceNum(180,250,10), rr(10,30)],
+      t:(a,b)=>`En avisbud får ${a} kr per runde. Hvor mye tjener han på ${b} runder?`},
+    // Strøm
+    {op:'eco', pick:()=>[niceNum(2,5,1), rr(200,800)],
+      t:(a,b)=>`Strømprisen er ${a} kr per kWh. Familien bruker ${b} kWh i en måned. Hvor mye må de betale?`},
+    // Abonnement
+    {op:'eco', pick:()=>[niceNum(99,199,10), 12],
+      t:(a,b)=>`Et strømmeabonnement koster ${a} kr per måned. Hvor mye blir det på ${b} måneder (ett år)?`},
+    {op:'eco', pick:()=>[niceNum(249,499,10), rr(3,6)],
+      t:(a,b)=>`Et treningssenter koster ${a} kr per måned. Hvor mye betaler man for ${b} måneder?`},
+
+    // ────── BRØK: 1/2, 1/3, 1/4 av hverdagslige mengder ──────
+    {op:'frac', pick:()=>{const b=pick([2,3,4]); return [b*rr(5,20), b];},
+      t:(a,b)=>{const f=b===2?'halvparten':b===3?'en tredjedel':'en fjerdedel';
+        return `En pose inneholder ${a} karameller. Lillesøster spiser ${f} av dem. Hvor mange karameller spiste hun?`;},
+      c:(a,b)=>a%b===0},
+    {op:'frac', pick:()=>{const b=pick([2,4]); return [b*100*rr(2,6), b];},
+      t:(a,b)=>{const f=b===2?'halvparten':'en fjerdedel';
+        return `Oppskriften trenger ${a} gram mel. Du skal bake ${f} av oppskriften. Hvor mange gram mel trenger du?`;},
+      c:(a,b)=>a%b===0},
+    {op:'frac', pick:()=>{const b=pick([2,3,4]); return [b*rr(3,10), b];},
+      t:(a,b)=>{const f=b===2?'halvparten':b===3?'en tredjedel':'en fjerdedel';
+        return `Klassen har ${a} elever. ${f.charAt(0).toUpperCase()+f.slice(1)} av dem spiller fotball. Hvor mange er det?`;},
+      c:(a,b)=>a%b===0},
+
+    // ────── PROSENT: rabatt, rente, moms ──────
+    {op:'pct', pick:()=>{const p=pick([10,20,25,50]); const step=p===10?10:p===20?20:p===25?20:10; return [step*rr(15,100), p];},
+      t:(a,b)=>`En genser koster ${a} kr. På salg er det ${b}% rabatt. Hvor mye må du betale?`,
+      c:(a,b)=>[10,20,25,50].includes(b)&&(a*(100-b))%100===0},
+    {op:'pct', pick:()=>{const p=pick([10,20,50]); const step=p===10?100:p===20?50:50; return [step*rr(5,80), p];},
+      t:(a,b)=>`En sykkel koster ${a} kr. Butikken gir ${b}% rabatt. Hvor mange kroner sparer du?`,
+      c:(a,b)=>[10,20,50].includes(b)&&(a*b)%100===0},
+    {op:'pct', pick:()=>{const p=pick([5,10]); const step=p===5?100:50; return [step*rr(10,50), p];},
+      t:(a,b)=>`Noah har ${a} kr på sparekontoen. Etter ett år får han ${b}% i rente. Hvor mye får han i renter?`,
+      c:(a,b)=>[5,10].includes(b)&&(a*b)%100===0},
+    {op:'pct', pick:()=>[niceNum(200,1500,100), 25],
+      t:(a,b)=>`Varen koster ${a} kr uten moms. Momsen er ${b}%. Hvor mye er momsen i kroner?`,
+      c:(a,b)=>(a*b)%100===0},
+
+    // ────── MÅLING: lengde, vekt, tid, volum ──────
+    // Lengde: meter → km
+    {op:'meas', pick:()=>[niceNum(400,1200,100), rr(5,10)],
+      t:(a,b)=>`Skoleveien til Aisha er ${a} meter én vei. Hvor mange kilometer går hun på ${b} skoledager (tur-retur)?`,
+      c:(a,b)=>(a*2*b)%1000===0},
+    // Vekt: gram → kg, eller kg addisjon
+    {op:'meas', pick:()=>[niceNum(150,450,50), rr(4,12)],
+      t:(a,b)=>`Ett eple veier ${a} gram. Hvor mange gram veier ${b} epler til sammen?`},
+    {op:'meas', pick:()=>[niceNum(15,45,5), niceNum(10,35,5)],
+      t:(a,b)=>`En koffert veier ${a} kg og en annen veier ${b} kg. Hvor mye veier de til sammen?`},
+    // Tid: minutter
+    {op:'meas', pick:()=>[niceNum(45,120,15), rr(2,5)],
+      t:(a,b)=>`En film varer ${a} minutter. Hvor mange timer og minutter blir det om du ser ${b} slike filmer etter hverandre?`,
+      c:(a,b)=>a>=30},
+    {op:'meas', pick:()=>[niceNum(30,90,10), rr(3,6)],
+      t:(a,b)=>`Trening varer ${a} minutter ${b} ganger i uken. Hvor mange minutter trener du til sammen på en uke?`},
+    // Volum: liter
+    {op:'meas', pick:()=>[niceNum(2,5,1), rr(6,15)],
+      t:(a,b)=>`En stor flaske saft er ${a} liter. Hvor mange liter saft blir det totalt i ${b} slike flasker?`},
   ]
 };
 
@@ -582,7 +689,7 @@ function buildSection(type, label, symbol, pillClass, monsterSrc, count, level) 
       // Utfordrende: 2-siffer (10–99) · 2-siffer (10–99)
       let a, b;
       if (level === 'easy')        { a = rand(1,5);   b = rand(1,5);   }
-      else if (level === 'medium') { a = rand(2,9);   b = rand(10,50); }
+      else if (level === 'medium') { a = rand(10,50); b = rand(2,9);   }
       else                         { a = rand(10,99); b = rand(10,99); }
       problem = `${a} \u00B7 ${b} =`;
     } else if (type === 'div') {
@@ -656,7 +763,7 @@ function pickNumbersForText(op, level) {
   }
   if (op === 'mul') {
     if (level === 'easy')        return [rand(1,5),   rand(1,5)];
-    if (level === 'medium')      return [rand(2,9),   rand(10,50)];
+    if (level === 'medium')      return [rand(10,50), rand(2,9)];
     return [rand(10,99), rand(10,99)];
   }
   if (op === 'div') {
@@ -732,7 +839,9 @@ function buildTextSection(monsterSrc, level, allowedOps) {
   let tmpl, a, b, ok = false;
   for (let tries = 0; tries < 100 && !ok; tries++) {
     tmpl = pool[rand(0, pool.length-1)];
-    [a, b] = pickNumbersForText(tmpl.op, level);
+    // Nye maler har sin egen pick() som gir realistiske tall per scenario.
+    // Fallback til den generiske pickNumbersForText hvis en eldre mal mangler pick.
+    [a, b] = tmpl.pick ? tmpl.pick() : pickNumbersForText(tmpl.op, level);
     ok = !tmpl.c || tmpl.c(a, b);
   }
 
