@@ -27,26 +27,21 @@ body {
 
 .screen-only { max-width: 860px; margin: 0 auto 28px; }
 
-.hero { text-align: center; padding: 36px 16px 20px; }
+.hero { text-align: center; padding: 32px 16px 16px; }
 .hero h1 {
   font-family: 'Fredoka One', cursive;
-  font-size: clamp(2.2rem, 5vw, 3.6rem);
+  font-size: clamp(2rem, 5vw, 3.2rem);
   color: var(--yellow);
   text-shadow: 3px 3px 0 var(--orange), 5px 5px 0 rgba(0,0,0,0.25);
 }
 .hero p { color: #a0b8d8; font-size: 1rem; margin-top: 6px; font-weight: 700; }
 
 .monster-parade {
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  gap: 6px;
-  margin: 16px 0 26px;
-  flex-wrap: wrap;
+  display: flex; justify-content: center; align-items: flex-end;
+  gap: 6px; margin: 14px 0 22px; flex-wrap: wrap;
 }
 .parade-monster {
-  width: 72px; height: 72px;
-  object-fit: contain;
+  width: 66px; height: 66px; object-fit: contain;
   filter: drop-shadow(0 8px 16px rgba(0,0,0,0.8));
   animation: float 3s ease-in-out infinite;
 }
@@ -55,27 +50,29 @@ body {
 .parade-monster:nth-child(4n) { animation-delay: -0.5s; }
 @keyframes float {
   0%,100% { transform: translateY(0) rotate(-1deg); }
-  50% { transform: translateY(-12px) rotate(1deg); }
+  50% { transform: translateY(-10px) rotate(1deg); }
 }
 
+/* Controls */
 .controls {
   background: rgba(255,255,255,0.05);
   border: 1.5px solid rgba(255,255,255,0.1);
   border-radius: 18px;
-  padding: 22px 26px;
+  padding: 20px 24px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
   backdrop-filter: blur(12px);
-  margin-bottom: 18px;
+  margin-bottom: 14px;
 }
 .control-group label {
   display: block; color: var(--yellow); font-weight: 900;
-  font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 7px;
+  font-size: 0.73rem; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 7px;
 }
 .control-group select,
-.control-group input {
-  width: 100%; padding: 9px 13px; border-radius: 10px;
+.control-group input[type="number"],
+.control-group input[type="text"] {
+  width: 100%; padding: 9px 12px; border-radius: 10px;
   border: 2px solid rgba(255,255,255,0.12);
   background: rgba(255,255,255,0.08); color: white;
   font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 700;
@@ -83,6 +80,53 @@ body {
 }
 .control-group select:hover, .control-group input:hover { border-color: var(--yellow); }
 .control-group select option { background: #1c1c2e; }
+
+/* Checkbox group */
+.checkbox-group {
+  background: rgba(255,255,255,0.05);
+  border: 1.5px solid rgba(255,255,255,0.1);
+  border-radius: 18px;
+  padding: 18px 24px;
+  backdrop-filter: blur(12px);
+  margin-bottom: 14px;
+}
+.checkbox-group-title {
+  color: var(--yellow); font-weight: 900;
+  font-size: 0.73rem; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px;
+}
+.checkbox-row {
+  display: flex; flex-wrap: wrap; gap: 10px;
+}
+.cb-item {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.06);
+  border: 2px solid rgba(255,255,255,0.12);
+  border-radius: 12px; padding: 8px 14px;
+  cursor: pointer; transition: border-color 0.2s, background 0.2s;
+  user-select: none;
+}
+.cb-item:hover { border-color: var(--yellow); background: rgba(255,255,255,0.1); }
+.cb-item input[type="checkbox"] { display: none; }
+.cb-check {
+  width: 20px; height: 20px; border-radius: 6px;
+  border: 2px solid rgba(255,255,255,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; flex-shrink: 0;
+  transition: all 0.15s;
+}
+.cb-item input:checked ~ .cb-check {
+  background: var(--yellow); border-color: var(--yellow); color: #1a0a00;
+}
+.cb-label { color: white; font-weight: 800; font-size: 0.95rem; }
+.cb-pill {
+  font-family: 'Fredoka One', cursive; font-size: 0.75rem;
+  padding: 2px 8px; border-radius: 10px; margin-left: 2px;
+}
+.cb-add  .cb-pill { background: #d6f5d6; color: #1a5c1a; }
+.cb-sub  .cb-pill { background: #ffe0e0; color: #8b0000; }
+.cb-mul  .cb-pill { background: #fff3cc; color: #7a5500; }
+.cb-div  .cb-pill { background: #d0eaff; color: #003e7a; }
+.cb-txt  .cb-pill { background: #f0e0ff; color: #5a0080; }
 
 .btn-generate {
   display: block; width: 100%; padding: 15px;
@@ -107,136 +151,146 @@ body {
 .btn-print:hover { transform: translateY(-2px); }
 .btn-print:active { transform: translateY(2px); box-shadow: 0 1px 0 #1a3a8a; }
 
-/* ── WORKSHEET ── */
+/* ══ WORKSHEET ══ */
 #worksheet-wrap { max-width: 860px; margin: 0 auto; }
 
+/*
+  A4 = 210×297mm. At 96dpi screen that's ~794×1123px.
+  We use exact A4 proportions and scale for screen.
+*/
 .worksheet {
   background: var(--paper);
-  width: 100%; max-width: 794px;
+  width: 210mm;
+  min-height: 297mm;
   margin: 0 auto;
-  padding: 26px 30px 28px;
-  border-radius: 14px;
+  padding: 14mm 16mm 12mm;
+  border-radius: 10px;
   box-shadow: 0 24px 70px rgba(0,0,0,0.55);
   position: relative;
-  min-height: 1060px;
-  overflow: visible;
+  /* Scale down for screen so it fits without scrolling */
+  transform-origin: top center;
 }
 
-.ws-corner {
-  position: absolute; pointer-events: none; z-index: 0;
-}
-.ws-corner img { opacity: 0.13; width: 115px; height: 115px; object-fit: contain; }
-.ws-corner.tl { top: -20px; left: -16px; }
-.ws-corner.tr { top: -20px; right: -16px; transform: scaleX(-1); }
-.ws-corner.bl { bottom: -20px; left: -16px; }
-.ws-corner.br { bottom: -20px; right: -16px; transform: scaleX(-1); }
+.ws-corner { position: absolute; pointer-events: none; z-index: 0; }
+.ws-corner img { opacity: 0.12; width: 28mm; height: 28mm; object-fit: contain; }
+.ws-corner.tl { top: -5mm; left: -5mm; }
+.ws-corner.tr { top: -5mm; right: -5mm; transform: scaleX(-1); }
+.ws-corner.bl { bottom: -5mm; left: -5mm; }
+.ws-corner.br { bottom: -5mm; right: -5mm; transform: scaleX(-1); }
 
 .ws-content { position: relative; z-index: 1; }
 
 /* Header */
 .ws-header {
   display: flex; align-items: center; justify-content: space-between;
-  background: var(--ink); border-radius: 10px;
-  padding: 9px 15px; margin-bottom: 13px;
+  background: var(--ink); border-radius: 8px;
+  padding: 3mm 5mm; margin-bottom: 4mm;
 }
-.ws-header-left { display: flex; align-items: center; gap: 8px; }
+.ws-header-left { display: flex; align-items: center; gap: 3mm; }
 .ws-header-monster {
-  width: 50px; height: 50px; object-fit: contain;
-  filter: drop-shadow(0 2px 10px rgba(0,0,0,0.5));
+  width: 14mm; height: 14mm; object-fit: contain;
+  filter: drop-shadow(0 1mm 3mm rgba(0,0,0,0.5));
 }
 .ws-title-text {
   font-family: 'Fredoka One', cursive;
-  font-size: 1.55rem; color: var(--yellow); letter-spacing: 0.5px;
+  font-size: 7mm; color: var(--yellow);
 }
-.ws-subtitle { font-size: 0.7rem; color: #999; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+.ws-subtitle { font-size: 2.8mm; color: #999; font-weight: 700; letter-spacing: 0.5mm; text-transform: uppercase; }
 .ws-week-pill {
   background: var(--yellow); color: var(--ink);
-  font-family: 'Fredoka One', cursive; font-size: 1rem;
-  padding: 5px 15px; border-radius: 20px;
+  font-family: 'Fredoka One', cursive; font-size: 4.5mm;
+  padding: 1.5mm 5mm; border-radius: 10mm;
 }
 
+/* Info row */
 .ws-info-row {
   display: grid; grid-template-columns: 2fr 1fr 1fr;
-  gap: 10px; margin-bottom: 13px;
+  gap: 4mm; margin-bottom: 4mm;
 }
 .ws-info-field {
-  display: flex; align-items: center; gap: 5px;
-  font-size: 0.8rem; font-weight: 800; color: #555;
-  border-bottom: 2px solid #333; padding-bottom: 2px;
+  display: flex; align-items: center; gap: 2mm;
+  font-size: 3mm; font-weight: 800; color: #555;
+  border-bottom: 0.5mm solid #333; padding-bottom: 1mm;
 }
 
-.section-hd { display: flex; align-items: center; gap: 8px; margin: 12px 0 7px; }
+/* Section headers */
+.section-hd { display: flex; align-items: center; gap: 3mm; margin: 4mm 0 2.5mm; }
 .section-pill {
-  display: flex; align-items: center; gap: 4px;
-  font-family: 'Fredoka One', cursive; font-size: 0.85rem;
-  padding: 3px 12px 3px 4px; border-radius: 20px; border: 2px solid; white-space: nowrap;
+  display: flex; align-items: center; gap: 1.5mm;
+  font-family: 'Fredoka One', cursive; font-size: 3.5mm;
+  padding: 1mm 4mm 1mm 1.5mm; border-radius: 10mm; border: 0.5mm solid; white-space: nowrap;
 }
 .section-pill img {
-  width: 28px; height: 28px; object-fit: contain;
-  filter: drop-shadow(0 1px 4px rgba(0,0,0,0.25));
+  width: 8mm; height: 8mm; object-fit: contain;
+  filter: drop-shadow(0 0.5mm 1.5mm rgba(0,0,0,0.25));
 }
 .pill-add { background: #d6f5d6; color: #1a5c1a; border-color: #1a5c1a; }
 .pill-sub { background: #ffe0e0; color: #8b0000; border-color: #8b0000; }
 .pill-mul { background: #fff3cc; color: #7a5500; border-color: #7a5500; }
 .pill-div { background: #d0eaff; color: #003e7a; border-color: #003e7a; }
 .pill-txt { background: #f0e0ff; color: #5a0080; border-color: #5a0080; }
-.section-rule { flex: 1; height: 2px; background: #e0e0e0; border-radius: 1px; }
+.section-rule { flex: 1; height: 0.4mm; background: #ddd; }
 
-.tasks-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px 14px; }
+/* Task grid */
+.tasks-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2.5mm 5mm; }
 .task-problem {
-  font-family: 'Fredoka One', cursive; font-size: 1.15rem; color: var(--ink);
-  margin-bottom: 2px; display: flex; align-items: baseline; gap: 4px;
+  font-family: 'Fredoka One', cursive; font-size: 5mm; color: var(--ink);
+  margin-bottom: 1mm; display: flex; align-items: baseline; gap: 1.5mm;
 }
-.task-num { font-size: 0.62rem; font-weight: 900; color: #bbb; min-width: 15px; }
+.task-num { font-size: 2.5mm; font-weight: 900; color: #bbb; min-width: 4mm; }
 
+/* Grid writing field — bigger squares */
 .grid-field {
-  width: 100%; height: 48px;
-  border: 1.5px solid #333; border-radius: 5px;
+  width: 100%;
+  border: 0.5mm solid #333; border-radius: 1.5mm;
   overflow: hidden; background: white; position: relative;
 }
-.grid-field svg { position:absolute; top:0; left:0; width:100%; height:100%; }
+.grid-field svg { display: block; width: 100%; height: 100%; }
 
+/* Text task */
 .txt-task-box {
-  border: 2px solid #333; border-radius: 10px;
-  padding: 12px 14px 10px; background: white; margin-bottom: 8px;
+  border: 0.5mm solid #333; border-radius: 3mm;
+  padding: 3mm 4mm 3mm; background: white; margin-bottom: 0;
 }
-.txt-task-monster-wrap { float: right; margin: -4px 0 6px 10px; }
+.txt-task-monster-wrap { float: right; margin: -1mm 0 2mm 3mm; }
 .txt-task-monster-wrap img {
-  width: 76px; height: 76px; object-fit: contain;
-  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.18));
+  width: 20mm; height: 20mm; object-fit: contain;
+  filter: drop-shadow(0 1mm 3mm rgba(0,0,0,0.18));
 }
-.txt-problem { font-size: 0.93rem; font-weight: 700; color: #222; line-height: 1.6; margin-bottom: 8px; }
-.txt-answer-label { font-size: 0.7rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: #888; margin-bottom: 4px; clear: both; }
-
+.txt-problem { font-size: 3.5mm; font-weight: 700; color: #222; line-height: 1.6; margin-bottom: 2.5mm; }
+.txt-answer-label { font-size: 2.5mm; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5mm; color: #888; margin-bottom: 1.5mm; clear: both; }
 .grid-field-tall {
-  width: 100%; height: 90px;
-  border: 1.5px solid #333; border-radius: 5px;
+  width: 100%;
+  border: 0.5mm solid #333; border-radius: 1.5mm;
   overflow: hidden; background: white; position: relative;
 }
-.grid-field-tall svg { position:absolute; top:0; left:0; width:100%; height:100%; }
+.grid-field-tall svg { display: block; width: 100%; height: 100%; }
 
+/* Footer */
 .ws-footer {
   display: flex; align-items: center; justify-content: space-between;
-  margin-top: 14px; padding-top: 10px;
-  border-top: 2px dashed #ccc;
-  font-size: 0.74rem; color: #aaa; font-weight: 800;
+  margin-top: 4mm; padding-top: 3mm;
+  border-top: 0.4mm dashed #ccc;
+  font-size: 2.5mm; color: #aaa; font-weight: 800;
 }
-.footer-monster {
-  width: 32px; height: 32px; object-fit: contain;
-  filter: drop-shadow(0 2px 5px rgba(0,0,0,0.15));
-}
-.score-box { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 900; color: #666; }
-.score-line { width: 55px; border-bottom: 2px solid #666; }
+.footer-monster { width: 9mm; height: 9mm; object-fit: contain; filter: drop-shadow(0 0.5mm 1.5mm rgba(0,0,0,0.15)); }
 
+/* ── PRINT ── */
 @media print {
-  @page { size: A4; margin: 10mm 12mm; }
-  body { background: none !important; padding: 0 !important; }
+  @page { size: A4; margin: 0; }
+  body { background: none !important; padding: 0 !important; margin: 0; }
   .screen-only { display: none !important; }
-  #worksheet-wrap { max-width: none; }
+  #worksheet-wrap { max-width: none; margin: 0; }
   .worksheet {
-    box-shadow: none !important; border-radius: 0 !important;
-    max-width: none !important; width: 100% !important;
-    min-height: auto !important; padding: 0 !important; overflow: visible !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    width: 210mm !important;
+    min-height: 297mm !important;
+    max-height: 297mm !important;
+    margin: 0 !important;
+    transform: none !important;
+    page-break-after: avoid;
+    overflow: hidden;
   }
   .ws-corner img { opacity: 0.08 !important; }
 }
@@ -250,6 +304,7 @@ body {
     <p>Generer unike oppgaver for hver uke — klar til utskrift på A4</p>
   </div>
   <div class="monster-parade" id="parade"></div>
+
   <div class="controls">
     <div class="control-group">
       <label>📅 Ukenummer</label>
@@ -270,24 +325,64 @@ body {
     <div class="control-group">
       <label>📋 Oppgaver per regneart</label>
       <select id="ctrl-count">
-        <option value="4">4 oppgaver</option>
-        <option value="6" selected>6 oppgaver</option>
-        <option value="8">8 oppgaver</option>
+        <option value="2">2 oppgaver</option>
+        <option value="3">3 oppgaver</option>
+        <option value="4" selected>4 oppgaver</option>
       </select>
     </div>
   </div>
+
+  <div class="checkbox-group">
+    <div class="checkbox-group-title">✅ Velg regnearter som skal være med</div>
+    <div class="checkbox-row">
+      <label class="cb-item cb-add">
+        <input type="checkbox" id="cb-add" checked>
+        <div class="cb-check">✓</div>
+        <span class="cb-label">Addisjon</span>
+        <span class="cb-pill">+</span>
+      </label>
+      <label class="cb-item cb-sub">
+        <input type="checkbox" id="cb-sub" checked>
+        <div class="cb-check">✓</div>
+        <span class="cb-label">Subtraksjon</span>
+        <span class="cb-pill">−</span>
+      </label>
+      <label class="cb-item cb-mul">
+        <input type="checkbox" id="cb-mul" checked>
+        <div class="cb-check">✓</div>
+        <span class="cb-label">Multiplikasjon</span>
+        <span class="cb-pill">·</span>
+      </label>
+      <label class="cb-item cb-div">
+        <input type="checkbox" id="cb-div" checked>
+        <div class="cb-check">✓</div>
+        <span class="cb-label">Divisjon</span>
+        <span class="cb-pill">:</span>
+      </label>
+      <label class="cb-item cb-txt">
+        <input type="checkbox" id="cb-txt" checked>
+        <div class="cb-check">✓</div>
+        <span class="cb-label">Tekstoppgave</span>
+        <span class="cb-pill">📖</span>
+      </label>
+    </div>
+  </div>
+
   <button class="btn-generate" onclick="generateWorksheet()">✨ Generer ny mattelekse!</button>
   <button class="btn-print" onclick="window.print()">🖨️ Skriv ut / Last ned PDF</button>
 </div>
 
+<!-- WORKSHEET -->
 <div id="worksheet-wrap">
-<div class="worksheet">
+<div class="worksheet" id="worksheet">
+
   <div class="ws-corner tl"><img id="corner-tl" src="" alt=""></div>
   <div class="ws-corner tr"><img id="corner-tr" src="" alt=""></div>
   <div class="ws-corner bl"><img id="corner-bl" src="" alt=""></div>
   <div class="ws-corner br"><img id="corner-br" src="" alt=""></div>
 
   <div class="ws-content">
+
     <div class="ws-header">
       <div class="ws-header-left">
         <img class="ws-header-monster" id="header-monster" src="" alt="">
@@ -305,54 +400,17 @@ body {
       <div class="ws-info-field">Klasse:&nbsp;<span id="ws-class-inline" style="font-weight:900;color:#222">3. trinn</span></div>
     </div>
 
-    <div class="section-hd">
-      <div class="section-pill pill-add"><img id="icon-add" src="" alt="">Addisjon &nbsp;+</div>
-      <div class="section-rule"></div>
-    </div>
-    <div class="tasks-grid" id="tasks-add"></div>
-
-    <div class="section-hd">
-      <div class="section-pill pill-sub"><img id="icon-sub" src="" alt="">Subtraksjon &nbsp;−</div>
-      <div class="section-rule"></div>
-    </div>
-    <div class="tasks-grid" id="tasks-sub"></div>
-
-    <div class="section-hd">
-      <div class="section-pill pill-mul"><img id="icon-mul" src="" alt="">Multiplikasjon &nbsp;·</div>
-      <div class="section-rule"></div>
-    </div>
-    <div class="tasks-grid" id="tasks-mul"></div>
-
-    <div class="section-hd">
-      <div class="section-pill pill-div"><img id="icon-div" src="" alt="">Divisjon &nbsp;:</div>
-      <div class="section-rule"></div>
-    </div>
-    <div class="tasks-grid" id="tasks-div"></div>
-
-    <div class="section-hd">
-      <div class="section-pill pill-txt"><img id="icon-txt" src="" alt="">Tekstoppgave</div>
-      <div class="section-rule"></div>
-    </div>
-    <div class="txt-task-box">
-      <div class="txt-task-monster-wrap">
-        <img id="txt-monster-img" src="" alt="">
-      </div>
-      <div class="txt-problem" id="txt-problem">Trykk «Generer» for å lage en ny oppgave!</div>
-      <div style="clear:both"></div>
-      <div class="txt-answer-label">Svar og utregning:</div>
-      <div class="grid-field-tall">
-        <svg><defs><pattern id="gtall" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="#c0d8f0" stroke-width="0.7"/></pattern></defs><rect width="100%" height="100%" fill="url(#gtall)"/></svg>
-      </div>
-    </div>
+    <!-- Sections injected by JS -->
+    <div id="ws-sections"></div>
 
     <div class="ws-footer">
-      <div style="display:flex;align-items:center;gap:7px">
+      <div style="display:flex;align-items:center;gap:2mm">
         <img class="footer-monster" id="footer-monster" src="" alt="">
         <span>Myntland Mattelekse</span>
       </div>
-      <div class="score-box">Poeng: <div class="score-line"></div> / <span id="ws-total">—</span></div>
       <span id="ws-class-footer">3. trinn</span>
     </div>
+
   </div>
 </div>
 </div>
@@ -371,33 +429,57 @@ const MONSTER_IMGS = [
 ];
 
 function rand(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
-
 function pickN(n){
   const idx=[...Array(MONSTER_IMGS.length).keys()].sort(()=>Math.random()-0.5);
   return Array.from({length:n},(_,i)=>MONSTER_IMGS[idx[i%idx.length]]);
 }
-
 function getRange(l){return l==='easy'?[1,20]:l==='medium'?[2,100]:[10,999];}
 
-function gridSVG(id,h){
-  return `<div class="grid-field" style="height:${h}px"><svg><defs><pattern id="${id}" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="#c0d8f0" stroke-width="0.7"/></pattern></defs><rect width="100%" height="100%" fill="url(#${id})"/></svg></div>`;
+// Grid with exact 10mm squares.
+// ViewBox uses 1 unit = 1mm, so cell=10 = exactly 10mm.
+// Width is fixed at 178mm (A4 210mm - 2×16mm padding).
+let gridCounter = 0;
+
+function makeGridField(heightMm) {
+  const id = 'gp' + (gridCounter++);
+  const W = 178, H = heightMm, cell = 10;
+  return `<div class="grid-field" style="height:${heightMm}mm">
+    <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="${id}" width="${cell}" height="${cell}" patternUnits="userSpaceOnUse">
+          <path d="M ${cell} 0 L 0 0 0 ${cell}" fill="none" stroke="#b0cceb" stroke-width="0.3"/>
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#${id})"/>
+    </svg>
+  </div>`;
 }
 
-function renderTasks(id,count,gen){
-  const el=document.getElementById(id);el.innerHTML='';
-  for(let i=0;i<count;i++){
-    const {p}=gen(i);
-    const d=document.createElement('div');d.className='task-item';
-    d.innerHTML=`<div class="task-problem"><span class="task-num">${i+1}.</span>${p}</div>${gridSVG('g'+id+i,48)}`;
-    el.appendChild(d);
-  }
+function makeTallGridField(heightMm) {
+  const id = 'gp' + (gridCounter++);
+  const W = 178, H = heightMm, cell = 10;
+  return `<div class="grid-field-tall" style="height:${heightMm}mm">
+    <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="${id}" width="${cell}" height="${cell}" patternUnits="userSpaceOnUse">
+          <path d="M ${cell} 0 L 0 0 0 ${cell}" fill="none" stroke="#b0cceb" stroke-width="0.3"/>
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#${id})"/>
+    </svg>
+  </div>`;
 }
 
-const TEXTS={
+// Height of grid field — always 20mm (2 rows of 10mm squares)
+function gridHeightMm(count) {
+  return 20;
+}
+
+const TEXTS = {
   easy:[
     {t:(a,b)=>`Monsteret har ${a} epler og får ${b} til. Hvor mange epler har det nå?`},
     {t:(a,b)=>`Det er ${a} drager i skogen. ${b} av dem flyr bort. Hvor mange er igjen?`,c:(a,b)=>a>b},
-    {t:(a,b)=>`Monsteret finner ${a} steiner på stranden og ${b} steiner i skogen. Hvor mange steiner er det til sammen?`},
+    {t:(a,b)=>`Monsteret finner ${a} steiner på stranden og ${b} i skogen. Hvor mange er det til sammen?`},
     {t:(a,b)=>`Det bor ${a} monstre i en hule. ${b} av dem går ut for å leke. Hvor mange er igjen?`,c:(a,b)=>a>b},
   ],
   medium:[
@@ -414,45 +496,122 @@ const TEXTS={
   ]
 };
 
-function generateWorksheet(){
-  const week=parseInt(document.getElementById('ctrl-week').value)||17;
-  const cls=document.getElementById('ctrl-class').value||'3. trinn';
-  const level=document.getElementById('ctrl-level').value;
-  const count=parseInt(document.getElementById('ctrl-count').value);
-  const [mn,mx]=getRange(level);
+function buildSection(type, label, symbol, pillClass, monsterSrc, count, level) {
+  const [mn,mx] = getRange(level);
+  const gridH = gridHeightMm(count);
 
-  document.getElementById('ws-week-pill').textContent='Uke '+week;
-  document.getElementById('ws-class-sub').textContent=cls;
-  document.getElementById('ws-class-inline').textContent=cls;
-  document.getElementById('ws-class-footer').textContent=cls;
-  document.getElementById('ws-total').textContent=count*4+1;
+  let tasks = [];
+  for (let i = 0; i < count; i++) {
+    let problem = '';
+    if (type === 'add') {
+      problem = `${rand(mn,mx)} + ${rand(1,mx)} =`;
+    } else if (type === 'sub') {
+      const a = rand(mn,mx), b = rand(1,a);
+      problem = `${a} \u2212 ${b} =`;
+    } else if (type === 'mul') {
+      const m = level==='easy'?5:level==='medium'?10:12;
+      problem = `${rand(1,m)} \u00B7 ${rand(1,m)} =`;
+    } else if (type === 'div') {
+      const m = level==='easy'?5:level==='medium'?10:12;
+      const b = rand(2,m), a = b*rand(1,m);
+      problem = `${a} : ${b} =`;
+    }
+    tasks.push(`
+      <div class="task-item">
+        <div class="task-problem">
+          <span class="task-num">${i+1}.</span>${problem}
+        </div>
+        ${makeGridField(gridH)}
+      </div>`);
+  }
 
-  const imgs=pickN(12);
-  ['header-monster','icon-add','icon-sub','icon-mul','icon-div','icon-txt',
-   'txt-monster-img','footer-monster','corner-tl','corner-tr','corner-bl','corner-br']
-  .forEach((id,i)=>document.getElementById(id).src=imgs[i]);
+  return `
+    <div class="section-hd">
+      <div class="section-pill ${pillClass}">
+        <img src="${monsterSrc}" alt="">
+        ${label} &nbsp;${symbol}
+      </div>
+      <div class="section-rule"></div>
+    </div>
+    <div class="tasks-grid">${tasks.join('')}</div>`;
+}
 
-  renderTasks('tasks-add',count,(i)=>{const a=rand(mn,mx),b=rand(1,mx);return{p:`${a} + ${b} =`};});
-  renderTasks('tasks-sub',count,(i)=>{const a=rand(mn,mx),b=rand(1,a);return{p:`${a} − ${b} =`};});
-  renderTasks('tasks-mul',count,(i)=>{const m=level==='easy'?5:level==='medium'?10:12;return{p:`${rand(1,m)} · ${rand(1,m)} =`};});
-  renderTasks('tasks-div',count,(i)=>{const m=level==='easy'?5:level==='medium'?10:12;const b=rand(2,m),a=b*rand(1,m);return{p:`${a} : ${b} =`};});
-
-  const pool=TEXTS[level];
-  const tmpl=pool[rand(0,pool.length-1)];
+function buildTextSection(monsterSrc, level) {
+  const [mn,mx] = getRange(level);
+  const pool = TEXTS[level];
+  const tmpl = pool[rand(0,pool.length-1)];
   let a,b,tries=0;
   do{a=rand(mn,mx);b=rand(2,Math.min(mx,a));tries++;}
   while(tmpl.c&&!tmpl.c(a,b)&&tries<100);
-  document.getElementById('txt-problem').textContent=tmpl.t(a,b);
+
+  return `
+    <div class="section-hd">
+      <div class="section-pill pill-txt">
+        <img src="${monsterSrc}" alt="">
+        Tekstoppgave
+      </div>
+      <div class="section-rule"></div>
+    </div>
+    <div class="txt-task-box">
+      <div class="txt-task-monster-wrap">
+        <img id="txt-monster-img" src="${monsterSrc}" alt="">
+      </div>
+      <div class="txt-problem">${tmpl.t(a,b)}</div>
+      <div style="clear:both"></div>
+      <div class="txt-answer-label">Svar og utregning:</div>
+      ${makeTallGridField(28)}
+    </div>`;
 }
 
+function generateWorksheet() {
+  const week   = parseInt(document.getElementById('ctrl-week').value)||17;
+  const cls    = document.getElementById('ctrl-class').value||'3. trinn';
+  const level  = document.getElementById('ctrl-level').value;
+  const count  = parseInt(document.getElementById('ctrl-count').value);
+
+  const useAdd = document.getElementById('cb-add').checked;
+  const useSub = document.getElementById('cb-sub').checked;
+  const useMul = document.getElementById('cb-mul').checked;
+  const useDiv = document.getElementById('cb-div').checked;
+  const useTxt = document.getElementById('cb-txt').checked;
+
+  if (!useAdd && !useSub && !useMul && !useDiv && !useTxt) {
+    alert('Velg minst én regneart!'); return;
+  }
+
+  document.getElementById('ws-week-pill').textContent = 'Uke ' + week;
+  document.getElementById('ws-class-sub').textContent = cls;
+  document.getElementById('ws-class-inline').textContent = cls;
+  document.getElementById('ws-class-footer').textContent = cls;
+
+  const imgs = pickN(12);
+  document.getElementById('header-monster').src = imgs[0];
+  document.getElementById('footer-monster').src = imgs[7];
+  document.getElementById('corner-tl').src = imgs[8];
+  document.getElementById('corner-tr').src = imgs[9];
+  document.getElementById('corner-bl').src = imgs[10];
+  document.getElementById('corner-br').src = imgs[11];
+
+  let html = '';
+  let imgIdx = 1;
+  if (useAdd) html += buildSection('add', 'Addisjon',       '+', 'pill-add', imgs[imgIdx++], count, level);
+  if (useSub) html += buildSection('sub', 'Subtraksjon',    '−', 'pill-sub', imgs[imgIdx++], count, level);
+  if (useMul) html += buildSection('mul', 'Multiplikasjon', '·', 'pill-mul', imgs[imgIdx++], count, level);
+  if (useDiv) html += buildSection('div', 'Divisjon',       ':', 'pill-div', imgs[imgIdx++], count, level);
+  if (useTxt) html += buildTextSection(imgs[imgIdx++], level);
+
+  document.getElementById('ws-sections').innerHTML = html;
+}
+
+// Init parade
 (function(){
-  const parade=document.getElementById('parade');
+  const parade = document.getElementById('parade');
   [...MONSTER_IMGS].sort(()=>Math.random()-0.5).forEach(src=>{
-    const img=document.createElement('img');
-    img.className='parade-monster';img.src=src;img.alt='';
+    const img = document.createElement('img');
+    img.className='parade-monster'; img.src=src; img.alt='';
     parade.appendChild(img);
   });
-  const now=new Date(),start=new Date(now.getFullYear(),0,1);
+  const now=new Date(), start=new Date(now.getFullYear(),0,1);
   const week=Math.ceil(((now-start)/86400000+start.getDay()+1)/7);
   document.getElementById('ctrl-week').value=week;
   generateWorksheet();
