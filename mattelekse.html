@@ -144,6 +144,27 @@ body {
 .cb-div  .cb-pill { background: #d0eaff; color: #003e7a; }
 .cb-txt  .cb-pill { background: #f0e0ff; color: #5a0080; }
 
+/* Per-operasjon vanskelighetsvelger (inne i checkbox-pillen) */
+.cb-level {
+  margin-left: 6px;
+  background: rgba(0,0,0,0.35);
+  color: white;
+  border: 1.5px solid rgba(255,255,255,0.2);
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 800;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+.cb-level:hover { border-color: var(--yellow); background: rgba(0,0,0,0.5); }
+.cb-level:focus { border-color: var(--yellow); }
+.cb-level option { background: #1c1c2e; color: white; }
+
 .btn-generate {
   display: block; width: 100%; padding: 15px;
   background: linear-gradient(135deg, var(--yellow), var(--orange));
@@ -341,14 +362,6 @@ body {
       <input type="text" id="ctrl-class" value="3. trinn">
     </div>
     <div class="control-group">
-      <label>🔢 Vanskelighetsgrad</label>
-      <select id="ctrl-level">
-        <option value="easy">😊 Lett (1–20)</option>
-        <option value="medium" selected>😎 Middels (1–100)</option>
-        <option value="hard">🔥 Vanskelig (1–1000)</option>
-      </select>
-    </div>
-    <div class="control-group">
       <label>📋 Oppg. pr. regneart</label>
       <select id="ctrl-count">
         <option value="2">2 oppgaver</option>
@@ -359,37 +372,62 @@ body {
   </div>
 
   <div class="checkbox-group">
-    <div class="checkbox-group-title">✅ Velg regnearter som skal være med</div>
+    <div class="checkbox-group-title">✅ Velg regnearter og vanskelighetsgrad</div>
     <div class="checkbox-row">
       <label class="cb-item cb-add">
         <input type="checkbox" id="cb-add" checked>
         <div class="cb-check">✓</div>
         <span class="cb-label">Addisjon</span>
         <span class="cb-pill">+</span>
+        <select class="cb-level" id="lvl-add" onclick="event.preventDefault();event.stopPropagation();" onmousedown="event.stopPropagation();">
+          <option value="easy">😊 Lett</option>
+          <option value="medium" selected>😎 Middels</option>
+          <option value="hard">🔥 Utfordrende</option>
+        </select>
       </label>
       <label class="cb-item cb-sub">
         <input type="checkbox" id="cb-sub" checked>
         <div class="cb-check">✓</div>
         <span class="cb-label">Subtraksjon</span>
         <span class="cb-pill">−</span>
+        <select class="cb-level" id="lvl-sub" onclick="event.preventDefault();event.stopPropagation();" onmousedown="event.stopPropagation();">
+          <option value="easy">😊 Lett</option>
+          <option value="medium" selected>😎 Middels</option>
+          <option value="hard">🔥 Utfordrende</option>
+        </select>
       </label>
       <label class="cb-item cb-mul">
         <input type="checkbox" id="cb-mul" checked>
         <div class="cb-check">✓</div>
         <span class="cb-label">Multiplikasjon</span>
         <span class="cb-pill">·</span>
+        <select class="cb-level" id="lvl-mul" onclick="event.preventDefault();event.stopPropagation();" onmousedown="event.stopPropagation();">
+          <option value="easy">😊 Lett</option>
+          <option value="medium" selected>😎 Middels</option>
+          <option value="hard">🔥 Utfordrende</option>
+        </select>
       </label>
       <label class="cb-item cb-div">
         <input type="checkbox" id="cb-div" checked>
         <div class="cb-check">✓</div>
         <span class="cb-label">Divisjon</span>
         <span class="cb-pill">:</span>
+        <select class="cb-level" id="lvl-div" onclick="event.preventDefault();event.stopPropagation();" onmousedown="event.stopPropagation();">
+          <option value="easy">😊 Lett</option>
+          <option value="medium" selected>😎 Middels</option>
+          <option value="hard">🔥 Utfordrende</option>
+        </select>
       </label>
       <label class="cb-item cb-txt">
         <input type="checkbox" id="cb-txt" checked>
         <div class="cb-check">✓</div>
         <span class="cb-label">Tekstoppgave</span>
         <span class="cb-pill">📖</span>
+        <select class="cb-level" id="lvl-txt" onclick="event.preventDefault();event.stopPropagation();" onmousedown="event.stopPropagation();">
+          <option value="easy">😊 Lett</option>
+          <option value="medium" selected>😎 Middels</option>
+          <option value="hard">🔥 Utfordrende</option>
+        </select>
       </label>
     </div>
   </div>
@@ -474,30 +512,48 @@ function fieldWidthMm(type) {
 
 const TEXTS = {
   easy:[
+    // Kun addisjon og subtraksjon med 2+2 siffer (10–99)
     {op:'add', t:(a,b)=>`Monsteret har ${a} epler og får ${b} til. Hvor mange epler har det nå?`},
     {op:'sub', t:(a,b)=>`Det er ${a} drager i skogen. ${b} av dem flyr bort. Hvor mange er igjen?`,c:(a,b)=>a>b},
     {op:'add', t:(a,b)=>`Monsteret finner ${a} steiner på stranden og ${b} i skogen. Hvor mange er det til sammen?`},
     {op:'sub', t:(a,b)=>`Det bor ${a} monstre i en hule. ${b} av dem går ut for å leke. Hvor mange er igjen?`,c:(a,b)=>a>b},
-    {op:'mul', t:(a,b)=>`Hvert monster har ${a} ballonger. Hvor mange ballonger har ${b} monstre til sammen?`},
-    {op:'div', t:(a,b)=>`Monsteret har ${a} kjeks og deler dem likt på ${b} tallerkener. Hvor mange kjeks blir det på hver?`,c:(a,b)=>a%b===0},
+    {op:'add', t:(a,b)=>`I dag fant monsteret ${a} blåbær, og i går fant det ${b}. Hvor mange blåbær har det funnet til sammen?`},
+    {op:'sub', t:(a,b)=>`Monsteret bakte ${a} kaker. Vennene spiste ${b} av dem. Hvor mange kaker er igjen?`,c:(a,b)=>a>b},
   ],
   medium:[
+    // Middels-nivå fra alle regnearter
     {op:'add', t:(a,b)=>`Monsteret plukker ${a} blåbær før lunsj og ${b} etter lunsj. Hvor mange blåbær har det plukket totalt?`},
     {op:'sub', t:(a,b)=>`Monsteret har ${a} mynter og bruker ${b} på godteri. Hvor mange mynter er igjen?`,c:(a,b)=>a>b},
     {op:'mul', t:(a,b)=>`En drage flyr ${a} km per dag. Hvor langt flyr den på ${b} dager?`},
     {op:'div', t:(a,b)=>`${a} monster-bær deles likt mellom ${b} monstre. Hvor mange bær får hvert monster?`,c:(a,b)=>a%b===0},
     {op:'sub', t:(a,b)=>`Monsterskolen har ${a} elever. ${b} er hjemme syke. Hvor mange er på skolen i dag?`,c:(a,b)=>a>b},
+    {op:'mul', t:(a,b)=>`På et monsterkurs er det ${a} elever i hver klasse. Hvor mange elever er det i ${b} klasser?`},
+    {op:'div', t:(a,b)=>`Monsteret har ${a} kroner og vil dele dem likt i ${b} sparebøsser. Hvor mye blir det i hver?`,c:(a,b)=>a%b===0},
   ],
   hard:[
+    // Utfordrende regneoppgaver fra alle regnearter
     {op:'add', t:(a,b)=>`Monsteret samler ${a} gullmynter den ene uken og ${b} den neste. Hvor mange har det til sammen?`},
     {op:'sub', t:(a,b)=>`Monsterbyen har ${a} innbyggere. ${b} reiser bort på ferie. Hvor mange blir igjen?`,c:(a,b)=>a>b},
     {op:'mul', t:(a,b)=>`Et romskip frakter ${a} monstre per tur. Hvor mange fraktes på ${b} turer?`},
     {op:'div', t:(a,b)=>`${a} monster-egg legges i kasser med ${b} per kasse. Hvor mange kasser trengs?`,c:(a,b)=>a%b===0},
+    // Økonomi (prisregning, veksel, lønn)
+    {op:'eco', t:(a,b)=>`Monsteret kjøper ${b} iskrem til ${a} kr per stykk. Hvor mye må det betale totalt?`},
+    {op:'eco', t:(a,b)=>`Monsteret har ${a} kr og kjøper en leke til ${b} kr. Hvor mye har det igjen?`,c:(a,b)=>a>b},
+    {op:'eco', t:(a,b)=>`Drageren tjener ${a} kr i timen og jobber ${b} timer. Hvor mye tjener den totalt?`},
+    // Brøk
+    {op:'frac', t:(a,b)=>`Monsteret har ${a} kjeks og spiser ${b==2?'halvparten':(b==4?'en fjerdedel':'en tredjedel')} av dem. Hvor mange kjeks spiste det?`,c:(a,b)=>[2,3,4].includes(b)&&a%b===0},
+    {op:'frac', t:(a,b)=>`Det er ${a} liter saft i en stor flaske. Monsteret drikker ${b==2?'halvparten':(b==4?'en fjerdedel':'en tredjedel')}. Hvor mange liter er igjen?`,c:(a,b)=>[2,3,4].includes(b)&&a%b===0},
+    // Prosent
+    {op:'pct', t:(a,b)=>`En jakke koster ${a} kr. Butikken gir ${b}% rabatt. Hvor mye må monsteret betale?`,c:(a,b)=>[10,20,25,50].includes(b)&&(a*(100-b))%100===0},
+    {op:'pct', t:(a,b)=>`Monsteret har ${a} kr på sparekontoen og får ${b}% i rente. Hvor mye er rentene?`,c:(a,b)=>[5,10,20,25].includes(b)&&(a*b)%100===0},
+    // Måling (lengde, tid, vekt)
+    {op:'meas', t:(a,b)=>`Monsteret løper ${a} meter hver dag. Hvor mange kilometer løper det på ${b} dager? (Svar i km)`,c:(a,b)=>a%1000===0||(a*b)%1000===0},
+    {op:'meas', t:(a,b)=>`En drage veier ${a} kg og en annen veier ${b} kg. Hvor mye veier de til sammen? (Svar i kg)`},
+    {op:'meas', t:(a,b)=>`Turen tar ${a} minutter én vei. Hvor mange timer og minutter tar det tur-retur ${b} ganger?`,c:(a,b)=>a>=30&&a<=180},
   ]
 };
 
 function buildSection(type, label, symbol, pillClass, monsterSrc, count, level) {
-  const [mn,mx] = getRange(level);
   const gridH = gridHeightMm(type);
   const gridW = fieldWidthMm(type);
 
@@ -505,16 +561,52 @@ function buildSection(type, label, symbol, pillClass, monsterSrc, count, level) 
   for (let i = 0; i < count; i++) {
     let problem = '';
     if (type === 'add') {
-      problem = `${rand(mn,mx)} + ${rand(1,mx)} =`;
+      // Lett: 2+2 siffer (10–99), Middels: 2–3 siffer (10–999), Utfordrende: 3–4 siffer (100–9999)
+      let mn, mx;
+      if (level === 'easy')      { mn = 10;  mx = 99;   }
+      else if (level === 'medium') { mn = 10;  mx = 999;  }
+      else                         { mn = 100; mx = 9999; }
+      problem = `${rand(mn,mx)} + ${rand(mn,mx)} =`;
     } else if (type === 'sub') {
-      const a = rand(mn,mx), b = rand(1,a);
+      // Samme områder som addisjon, men sikrer positivt svar (a ≥ b)
+      let mn, mx;
+      if (level === 'easy')      { mn = 10;  mx = 99;   }
+      else if (level === 'medium') { mn = 10;  mx = 999;  }
+      else                         { mn = 100; mx = 9999; }
+      const a = rand(mn, mx);
+      const b = rand(mn, a);
       problem = `${a} \u2212 ${b} =`;
     } else if (type === 'mul') {
-      const m = level==='easy'?5:level==='medium'?10:12;
-      problem = `${rand(1,m)} \u00B7 ${rand(1,m)} =`;
+      // Lett: 1–5 gangen · 1–5
+      // Middels: 1-siffer (2–9) · 10–50
+      // Utfordrende: 2-siffer (10–99) · 2-siffer (10–99)
+      let a, b;
+      if (level === 'easy')        { a = rand(1,5);   b = rand(1,5);   }
+      else if (level === 'medium') { a = rand(2,9);   b = rand(10,50); }
+      else                         { a = rand(10,99); b = rand(10,99); }
+      problem = `${a} \u00B7 ${b} =`;
     } else if (type === 'div') {
-      const m = level==='easy'?5:level==='medium'?10:12;
-      const b = rand(2,m), a = b*rand(1,m);
+      // Lett: basert på 1–5 gangen (går alltid opp)
+      // Middels: 10–100 delt på 2–10 (går alltid opp)
+      // Utfordrende: 100–1000 delt på 2–30 (går alltid opp)
+      let a, b;
+      if (level === 'easy') {
+        b = rand(1,5);
+        a = b * rand(1,5);
+      } else if (level === 'medium') {
+        b = rand(2,10);
+        // finn et produkt b·k som ligger i [10,100]
+        const kMin = Math.max(1, Math.ceil(10 / b));
+        const kMax = Math.floor(100 / b);
+        const k = rand(kMin, Math.max(kMin, kMax));
+        a = b * k;
+      } else {
+        b = rand(2,30);
+        const kMin = Math.max(1, Math.ceil(100 / b));
+        const kMax = Math.floor(1000 / b);
+        const k = rand(kMin, Math.max(kMin, kMax));
+        a = b * k;
+      }
       problem = `${a} : ${b} =`;
     }
     tasks.push(`
@@ -538,20 +630,111 @@ function buildSection(type, label, symbol, pillClass, monsterSrc, count, level) 
     <div class="${gridClass}">${tasks.join('')}</div>`;
 }
 
+// Velg passende tall (a, b) for én tekstoppgavetype og nivå.
+// Returnerer [a, b] som maler kan bruke, uavhengig av tmpl.c-sjekken
+// (den kjøres fortsatt etterpå for ekstra sikring).
+function pickNumbersForText(op, level) {
+  // Regne­arts­nivåene matcher spesifikasjonen:
+  //   add/sub easy  : 2+2 siffer (10–99)
+  //   add/sub med   : 2–3 siffer (10–999)
+  //   add/sub hard  : 3–4 siffer (100–9999)
+  //   mul    easy   : 1–5 · 1–5
+  //   mul    med    : 1-siffer · 10–50
+  //   mul    hard   : 2-siffer · 2-siffer
+  //   div    easy   : basert på 1–5 gangen
+  //   div    med    : 10–100 delt på 2–10
+  //   div    hard   : 100–1000 delt på 2–30
+  if (op === 'add' || op === 'sub') {
+    let mn, mx;
+    if (level === 'easy')        { mn = 10;  mx = 99;   }
+    else if (level === 'medium') { mn = 10;  mx = 999;  }
+    else                          { mn = 100; mx = 9999; }
+    const a = rand(mn, mx);
+    // For sub: b ≤ a. For add: fritt, men samme skala.
+    const b = op === 'sub' ? rand(mn, a) : rand(mn, mx);
+    return [a, b];
+  }
+  if (op === 'mul') {
+    if (level === 'easy')        return [rand(1,5),   rand(1,5)];
+    if (level === 'medium')      return [rand(2,9),   rand(10,50)];
+    return [rand(10,99), rand(10,99)];
+  }
+  if (op === 'div') {
+    let b, a;
+    if (level === 'easy') {
+      b = rand(1,5);
+      a = b * rand(1,5);
+    } else if (level === 'medium') {
+      b = rand(2,10);
+      const kMin = Math.max(1, Math.ceil(10 / b));
+      const kMax = Math.floor(100 / b);
+      a = b * rand(kMin, Math.max(kMin, kMax));
+    } else {
+      b = rand(2,30);
+      const kMin = Math.max(1, Math.ceil(100 / b));
+      const kMax = Math.floor(1000 / b);
+      a = b * rand(kMin, Math.max(kMin, kMax));
+    }
+    return [a, b];
+  }
+  // Økonomi: priser/beløp i kroner (hard-nivå)
+  if (op === 'eco') {
+    // Velg pris 20–500, antall 2–12, eller beløp/pris som går opp
+    const a = rand(50, 500);
+    const b = rand(2, 12);
+    return [a, b];
+  }
+  // Brøk: a må være delelig med b (2, 3 eller 4)
+  if (op === 'frac') {
+    const b = [2,3,4][rand(0,2)];
+    const k = rand(4, 20); // 4·2 = 8 … 20·4 = 80
+    const a = b * k;
+    return [a, b];
+  }
+  // Prosent: velg prosenter som gir hele tall (10, 20, 25, 50)
+  if (op === 'pct') {
+    const pcts = [10, 20, 25, 50];
+    const b = pcts[rand(0, pcts.length-1)];
+    // a må være delelig med 100/gcd slik at a·b/100 blir heltall
+    // 10% → delelig med 10, 20% → 5, 25% → 4, 50% → 2
+    const step = b === 10 ? 10 : b === 20 ? 5 : b === 25 ? 4 : 2;
+    const a = step * rand(20, 200); // gir priser 40–2000
+    return [a, b];
+  }
+  // Måling: tall som passer meter/minutter/kg-oppgaver
+  if (op === 'meas') {
+    // Bruk blanding: lengde i hele 100-meter, eller minutter 30–180
+    const a = rand(1, 10) * 500; // 500–5000 meter
+    const b = rand(2, 7);
+    return [a, b];
+  }
+  // Fallback
+  return [rand(10, 100), rand(2, 10)];
+}
+
 function buildTextSection(monsterSrc, level, allowedOps) {
-  const [mn,mx] = getRange(level);
   const fullPool = TEXTS[level];
 
   // Filtrer poolen til kun maler som matcher valgte regnearter.
-  // Fallback: hvis ingen maler matcher (f.eks. brukeren valgte bare "tekstoppgave"
-  // uten andre regnearter), bruk hele poolen.
-  let pool = fullPool.filter(tmpl => allowedOps.includes(tmpl.op));
+  // For hard-nivå inkluderer vi ALLTID de utvidede kategoriene
+  // (eco/frac/pct/meas) fordi de er egne spesialoppgaver som ikke
+  // er knyttet til de fire vanlige regneartene – eleven skal utsettes
+  // for dem uavhengig av hvilke vanlige regnearter som er huket av.
+  const extraOps = ['eco','frac','pct','meas'];
+  let pool = fullPool.filter(tmpl =>
+    allowedOps.includes(tmpl.op) || extraOps.includes(tmpl.op)
+  );
+  // Fallback: hvis ingen maler matcher (f.eks. brukeren valgte bare
+  // "tekstoppgave" uten andre regnearter og vi er på easy/medium), bruk hele poolen.
   if (pool.length === 0) pool = fullPool;
 
-  const tmpl = pool[rand(0,pool.length-1)];
-  let a,b,tries=0;
-  do{a=rand(mn,mx);b=rand(2,Math.min(mx,a));tries++;}
-  while(tmpl.c&&!tmpl.c(a,b)&&tries<100);
+  // Forsøk opptil 100 ganger å finne en gyldig (tmpl, a, b)-kombinasjon
+  let tmpl, a, b, ok = false;
+  for (let tries = 0; tries < 100 && !ok; tries++) {
+    tmpl = pool[rand(0, pool.length-1)];
+    [a, b] = pickNumbersForText(tmpl.op, level);
+    ok = !tmpl.c || tmpl.c(a, b);
+  }
 
   return `
     <div class="section-hd">
@@ -640,7 +823,6 @@ function estimateSectionHeightMm(type, count) {
 function generateWorksheet() {
   const week   = parseInt(document.getElementById('ctrl-week').value)||17;
   const cls    = document.getElementById('ctrl-class').value||'3. trinn';
-  const level  = document.getElementById('ctrl-level').value;
   const count  = parseInt(document.getElementById('ctrl-count').value);
 
   const useAdd = document.getElementById('cb-add').checked;
@@ -648,6 +830,13 @@ function generateWorksheet() {
   const useMul = document.getElementById('cb-mul').checked;
   const useDiv = document.getElementById('cb-div').checked;
   const useTxt = document.getElementById('cb-txt').checked;
+
+  // Individuelle vanskelighetsgrader per regneart
+  const lvlAdd = document.getElementById('lvl-add').value;
+  const lvlSub = document.getElementById('lvl-sub').value;
+  const lvlMul = document.getElementById('lvl-mul').value;
+  const lvlDiv = document.getElementById('lvl-div').value;
+  const lvlTxt = document.getElementById('lvl-txt').value;
 
   if (!useAdd && !useSub && !useMul && !useDiv && !useTxt) {
     alert('Velg minst én regneart!'); return;
@@ -667,11 +856,11 @@ function generateWorksheet() {
 
   // Bygg alle valgte seksjoner som {type, html, heightMm}-poster
   const sections = [];
-  if (useAdd) sections.push({type:'add', html: buildSection('add','Addisjon',      '+','pill-add', imgs[imgIdx++], count, level), heightMm: estimateSectionHeightMm('add', count)});
-  if (useSub) sections.push({type:'sub', html: buildSection('sub','Subtraksjon',   '−','pill-sub', imgs[imgIdx++], count, level), heightMm: estimateSectionHeightMm('sub', count)});
-  if (useMul) sections.push({type:'mul', html: buildSection('mul','Multiplikasjon','·','pill-mul', imgs[imgIdx++], count, level), heightMm: estimateSectionHeightMm('mul', count)});
-  if (useDiv) sections.push({type:'div', html: buildSection('div','Divisjon',      ':','pill-div', imgs[imgIdx++], count, level), heightMm: estimateSectionHeightMm('div', count)});
-  if (useTxt) sections.push({type:'txt', html: buildTextSection(imgs[imgIdx++], level, allowedOps),                                heightMm: estimateSectionHeightMm('txt', count)});
+  if (useAdd) sections.push({type:'add', html: buildSection('add','Addisjon',      '+','pill-add', imgs[imgIdx++], count, lvlAdd), heightMm: estimateSectionHeightMm('add', count)});
+  if (useSub) sections.push({type:'sub', html: buildSection('sub','Subtraksjon',   '−','pill-sub', imgs[imgIdx++], count, lvlSub), heightMm: estimateSectionHeightMm('sub', count)});
+  if (useMul) sections.push({type:'mul', html: buildSection('mul','Multiplikasjon','·','pill-mul', imgs[imgIdx++], count, lvlMul), heightMm: estimateSectionHeightMm('mul', count)});
+  if (useDiv) sections.push({type:'div', html: buildSection('div','Divisjon',      ':','pill-div', imgs[imgIdx++], count, lvlDiv), heightMm: estimateSectionHeightMm('div', count)});
+  if (useTxt) sections.push({type:'txt', html: buildTextSection(imgs[imgIdx++], lvlTxt, allowedOps),                               heightMm: estimateSectionHeightMm('txt', count)});
 
   // Standardfordeling: add/sub/mul på side 1, div/tekst på side 2
   const page1Types = new Set(['add','sub','mul']);
