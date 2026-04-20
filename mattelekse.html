@@ -203,7 +203,7 @@ body {
 }
 .cb-item {
   display: grid;
-  grid-template-columns: auto auto 1fr auto;
+  grid-template-columns: auto 56px 1fr auto;
   align-items: center;
   gap: 14px;
   background: var(--bg);
@@ -242,13 +242,14 @@ body {
 }
 .cb-pill {
   font-family: 'Fredoka One', cursive;
-  font-size: 1.1rem;
-  padding: 4px 14px;
-  border-radius: 12px;
+  font-size: 1.15rem;
+  padding: 4px 0;
+  border-radius: 10px;
   border: 1.5px solid;
-  min-width: 44px;
+  width: 56px;
   text-align: center;
-  line-height: 1;
+  line-height: 1.2;
+  justify-self: center;
 }
 .cb-add  .cb-pill { background: #d6f5d6; color: #1a5c1a; border-color: #1a5c1a; }
 .cb-sub  .cb-pill { background: #ffe0e0; color: #8b0000; border-color: #8b0000; }
@@ -292,7 +293,7 @@ body {
 /* Mobil: stable opp innholdet pent */
 @media (max-width: 520px) {
   .cb-item {
-    grid-template-columns: auto auto 1fr;
+    grid-template-columns: auto 56px 1fr;
     grid-template-rows: auto auto;
     row-gap: 10px;
   }
